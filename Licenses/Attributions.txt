@@ -15,3 +15,15 @@ SQLite
 This package uses the SQlite database.
 
 https://www.sqlite.org/index.html
+
+Jisho API
+
+This package also uses the Jisho API.
+
+https://jisho.org/
+
+JSON
+
+This package uses JSON.
+
+https://www.json.org/
