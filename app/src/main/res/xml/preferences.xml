@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+    <PreferenceCategory
+        android:title="@string/settings_search"
+        android:key="pk_search_settings">
+
+        <ListPreference
+            android:key="search_preference"
+            android:title="@string/settings_search_title"
+            android:entries="@array/search_settings_list"
+            android:entryValues="@array/search_settings_data"
+            android:defaultValue="Offline JMDict"/>
+
+        <CheckBoxPreference
+            android:title="Auto-search on text change"
+            android:defaultValue="false"
+            android:key="auto_search">
+
+        </CheckBoxPreference>
+
+        <EditTextPreference
+            android:defaultValue="100"
+            android:inputType="number"
+            android:key="max_results"
+            android:title="Max Results">
+        </EditTextPreference>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Pop ups"
+        android:key="pk_pop_ups">
+
+        <CheckBoxPreference
+            android:title="Show output Romaji on search"
+            android:defaultValue="false"
+            android:key="pop_ups_romaji">
+
+        </CheckBoxPreference>
+
+        <CheckBoxPreference
+            android:title="Show if no connection when using Jisho.com"
+            android:defaultValue="false"
+            android:key="pop_ups_jishonoc">
+
+        </CheckBoxPreference>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Themes"
+        android:key="pk_themes">
+        <CheckBoxPreference
+            android:title="Use dark theme"
+            android:defaultValue="false"
+            android:key="cb_usedt">
+        </CheckBoxPreference>
+
+    </PreferenceCategory>
+</PreferenceScreen>

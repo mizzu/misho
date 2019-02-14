@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+        <color name="toggleToggled">#8500418c</color>
+        <color name="toggleUntoggled">#0000ff00</color>
+
+    <color name="colorPrimary">#a53f51b5</color>
+    <color name="colorPrimaryDark">#001494</color>
+    <color name="colorAccent">#000000</color>
+    <color name="colorFont">#000000</color>
+    <color name="colorBG">#ffffff</color>
+
+    <color name="colorAccentDT">#cf2d00</color>
+    <color name="colorPrimaryDarkDT">#1b1b1b</color>
+    <color name="colorPrimaryDT">#393939</color>
+    <color name="colorFontDT">#da0004</color>
+    <color name="colorBGDT">#000000</color>
+    <color name="colorSecondary">#f24646</color>
+</resources>

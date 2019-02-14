@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="search_settings_list">
+        <item>Offline JMDict</item>
+        <item>Jisho.org</item>
+    </string-array>
+
+    <string-array name="search_settings_data">
+        <item>Offline JMDict</item>
+        <item>Jisho</item>
+    </string-array>
+</resources>

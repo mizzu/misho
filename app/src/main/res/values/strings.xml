@@ -1,0 +1,55 @@
+<resources>
+    <string name="app_name">Misho</string>
+    <string name="title_activity_dic_element">DicElement</string>
+    <string name="pos_title">Parts of speech</string>
+    <string name="gloss_title">Definitions</string>
+    <string name="ant_title">Antonyms</string>
+    <string name="dial_title">Dialects</string>
+    <string name="xref_title">Cross-references</string>
+    <string name="lsource_title">Source</string>
+    <string name="sinf_title">More Information</string>
+    <string name="field_title">Field of use</string>
+    <string name="stag_title">Restricted to</string>
+    <string name="settings_dropdown">Settings</string>
+    <string name="meaning_title">Meanings</string>
+    <string name="settings_search">Search Settings</string>
+    <string name="settings_search_title">Search Method</string>
+    <string name="romaji">Romaji</string>
+    <string name="kanji">漢字</string>
+    <string name="tango">単語</string>
+
+    <string name="onyomi">Onyomi</string>
+    <string name="kunyomi">Kunyomi</string>
+    <string name="nanori">Nanori</string>
+    <string name="stroke_count">Stroke Count:</string>
+    <string name="jlpt">JLPT:</string>
+    <string name="grade">Grade:</string>
+    <string name="freq">Frequency:</string>
+    <string name="radicals">Radicals</string>
+
+    <string name="dr_search">Search</string>
+    <string name="dr_settings">Settings</string>
+    <string name="dr_vocab">Vocab</string>
+
+    <!-- DB strings -->
+    <string name="n">noun (common) (futsuumeishi)</string>
+    
+    <string name="v5aru">Godan verb - -aru special class</string>
+    <string name="v5b">Godan verb with `bu\' ending</string>
+    <string name="v5g">Godan verb with `gu\' ending</string>
+    <string name="v5k">Godan verb with `ku\' ending</string>
+    <string name="v5k_s">Godan verb - Iku/Yuku special class</string>
+    <string name="v5m">Godan verb with `mu\' ending</string>
+    <string name="v5n">Godan verb with `nu\' ending</string>
+    <string name="v5r">Godan verb with `ru\' ending</string>
+    <string name="v5s">Godan verb with `su\' ending</string>
+    <string name="v5t">Godan verb with `tsu\' ending</string>
+    <string name="v5u">Godan verb with `u\' ending</string>
+    <string name="v5u_s">Godan verb with `u\' ending (special class)</string>
+
+    <string name="vs">noun or participle which takes the aux. verb suru</string>
+    <string name="vs_c">su verb - precursor to the modern suru</string>
+    <string name="vs_s">suru verb - special class</string>
+    <string name="vs_i">suru verb - irregular</string>
+
+</resources>

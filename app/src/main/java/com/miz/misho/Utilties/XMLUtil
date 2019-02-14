@@ -1,0 +1,138 @@
+package misho;
+/*
+
+##############
+##DEPRECATED##
+##############
+
+import org.xml.sax.helpers.DefaultHandler;
+
+
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import static java.lang.System.exit;
+
+
+public class XMLUtil{
+    SAXParserFactory f;
+    JMDH h1;
+    JMDH h2;
+    JMDH h3;
+    JMDH h4;
+    JMDH h5;
+    JMDH h6;
+   SAXParser sp;
+
+
+    public XMLUtil() {
+        try {
+            f = SAXParserFactory.newInstance();
+            sp = f.newSAXParser();
+            h1 = new JMDH();
+            h2 = new JMDH();
+            h3 = new JMDH();
+            h4 = new JMDH();
+            h5 = new JMDH();
+            h6 = new JMDH();
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            exit(1);
+        }
+    }
+
+
+    long search(final String keyword, final BufferedInputStream p1, final BufferedInputStream p2, final BufferedInputStream p3, final BufferedInputStream p4, final BufferedInputStream p5, final BufferedInputStream p6) throws Exception {
+        long s = System.nanoTime();
+        Thread xs1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    sp.parse(p1, h1.h);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+        Thread xs2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    sp.parse(p2, h2.h);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+        Thread xs3 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    sp.parse(p3, h3.h);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+        Thread xs4 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    sp.parse(p4, h4.h);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+        Thread xs5 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    sp.parse(p5, h5.h);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+        Thread xs6 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    sp.parse(p6, h6.h);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+        xs1.start();
+        xs2.start();
+        xs3.start();
+        xs4.start();
+        xs5.start();
+        xs6.start();
+        xs1.join();
+        xs2.join();
+        xs3.join();
+        xs4.join();
+        xs5.join();
+        xs6.join();
+        /*
+        ArrayList<DEntry> rezf = new ArrayList<>(h1.rez);
+        rezf.addAll(h2.rez);
+        rezf.addAll(h3.rez);
+        //return rezf;
+        return System.nanoTime() - s;
+    }
+}
+
+*/

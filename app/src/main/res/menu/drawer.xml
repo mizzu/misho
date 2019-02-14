@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<group android:checkableBehavior="single">
+    <item android:title="@string/dr_search"
+        android:id="@+id/dr_search"/>
+    <item android:title="@string/dr_vocab"
+        android:id="@+id/dr_vocab"/>
+</group>
+    <group android:checkableBehavior="none">
+    <item android:title="@string/dr_settings"
+        android:id="@+id/dr_settings"/>
+</group>
+</menu>

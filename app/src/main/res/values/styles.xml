@@ -1,0 +1,113 @@
+<resources>
+
+
+    <style name="normalTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:itemBackground">@drawable/rad_toggle</item>
+        <item name="windowActionModeOverlay">true</item>
+    </style>
+
+    <style name="darkTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:textColorPrimary">@color/colorBG</item>
+        <item name="android:itemBackground">@drawable/rad_toggle</item>
+    </style>
+    <!-- Base application theme.
+    <style name="normalTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:textColor">@color/colorFont</item>
+        <item name="android:textViewStyle">@style/textViewNormal</item>
+        <item name="android:checkboxStyle">@style/checkboxNormal</item>
+        <item name="android:listDivider">@android:color/black</item>
+        <item name="android:buttonStyleToggle">@style/toggleNormal</item>
+        <item name="android:tabWidgetStyle">@style/tabNormal</item>
+    </style>
+
+    <style name="darkTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimaryDT</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkDT</item>
+        <item name="colorAccent">@color/colorFontDT</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:listDivider">@android:color/white</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:textColor">@color/colorFontDT</item>
+        <item name="android:textColorPrimary">@color/colorFontDT</item>
+        <item name="android:textColorSecondary">@color/colorSecondary</item>
+
+        <item name="android:textViewStyle">@style/textViewDark</item>
+
+        <item name="android:checkboxStyle">@style/checkboxDark</item>
+        <item name="android:tabWidgetStyle">@style/tabDark</item>
+        <item name="android:buttonStyleToggle">@style/toggleDark</item>
+        <item name="android:editTextStyle">@style/editDark</item>
+        <item name="android:preferenceStyle">@style/settingsDark</item>
+
+    </style>
+
+    <style name="textViewDark" parent="android:Widget.TextView">
+
+        <item name="android:textColor">@color/colorFontDT</item>
+    </style>
+
+    <style name="textViewNormal" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/colorFont</item>
+    </style>
+
+    <style name="checkboxDark" parent="android:Widget.CompoundButton.CheckBox">
+
+        <item name="android:textColor">@color/colorFontDT</item>
+    </style>
+
+    <style name="checkboxNormal" parent="android:Widget.CompoundButton.CheckBox">
+        <item name="android:background">@color/colorBG</item>
+        <item name="android:textColor">@color/colorFont</item>
+    </style>
+
+    <style name="toggleDark" parent="android:Widget.Holo.Button.Toggle">
+        <item name="android:textColor">@color/colorFontDT</item>
+    </style>
+
+    <style name="toggleNormal" parent="android:Widget.Holo.Button.Toggle">
+        <item name="android:textColor">@color/colorFont</item>
+    </style>
+
+    <style name="tabDark" parent="">
+
+        <item name="android:textColor">@color/colorFontDT</item>
+    </style>
+
+    <style name="tabNormal" parent="android:Widget.TabWidget">
+
+        <item name="android:textColor">@color/colorFont</item>
+    </style>
+
+    <style name="llDark">
+        <item name="android:background">@color/colorBGDT</item>
+        <item name="android:textColor">@color/colorFontDT</item>
+    </style>
+
+    <style name="llNormal">
+        <item name="android:background">@color/colorBG</item>
+        <item name="android:textColor">@color/colorFont</item>
+    </style>
+
+    <style name="editDark" parent="android:Widget.EditText">
+        <item name="android:editTextColor">@color/colorFontDT</item>
+    </style>
+
+    <style name="editNormal" parent="android:Widget.EditText">
+        <item name="android:background">@color/colorBG</item>
+    </style>
+
+    This will set the fade in animation on all your activities by default
+    <style name="settingsDark"  parent="darkTheme">
+        <item name="colorControlNormal">@color/colorAccentDT</item>
+        <item name="colorControlActivated">@color/colorFontDT</item>
+ </style>
+ -->
+</resources>

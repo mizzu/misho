@@ -1,0 +1,17 @@
+Japanese Dictionary Files
+
+This package uses modified EDICT and KANJIDIC dictionary files, as well as RADK and KRAD files. These files are the property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's licence.
+
+http://www.edrdg.org/
+
+Apache Commons
+
+This package uses some libraries from the Apache Commons library. (See Apache License for license details)
+
+https://commons.apache.org/
+
+SQLite
+
+This package uses the SQlite database.
+
+https://www.sqlite.org/index.html

@@ -1,0 +1,8 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="titletextsize">8sp</dimen>
+    <dimen name="infotextsize">12sp</dimen>
+    <dimen name="ktitletextsize">14sp</dimen>
+    <dimen name="kinfotextsize">18sp</dimen>
+
+</resources>

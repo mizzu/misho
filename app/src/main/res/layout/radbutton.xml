@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ToggleButton android:id="@+id/btn_rad"
+    android:background="@drawable/rad_toggle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:width="5dp"
+    android:height="5dp"
+    android:checked="false"
+    android:onClick="doRadSearch"
+    android:padding="5dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+</ToggleButton>

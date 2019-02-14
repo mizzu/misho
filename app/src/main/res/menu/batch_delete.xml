@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:title="Cancel"
+        android:id="@+id/batch_cancel"/>
+
+    <item
+        android:title="Confirm"
+        android:id="@+id/batch_confirm"/>
+</menu>
