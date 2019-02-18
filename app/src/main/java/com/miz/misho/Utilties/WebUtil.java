@@ -22,11 +22,11 @@ import org.apache.commons.io.IOUtils;
 
 public class WebUtil {
 
-    final String base = "https://misho.org/api/v1/search/words?keyword=";
+    final private String base = "https://jisho.org/api/v1/search/words?keyword=";
     //final String kbase = "";
   //  final String edr = "\\{\"english_definitions\":(.*?)]";
  //   final Pattern pattern = Pattern.compile(edr);
-  ArrayList<DEntry> rez;
+  private ArrayList<DEntry> rez;
 
   public void WebUtil() {
       rez = null;

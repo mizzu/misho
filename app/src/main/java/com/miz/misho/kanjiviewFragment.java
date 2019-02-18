@@ -4,6 +4,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -16,6 +19,9 @@ public class kanjiviewFragment extends android.support.v4.app.Fragment {
     KEntry entry;
     boolean isDark;
     SharedPreferences mSP;
+    searchActivity mActivity;
+
+    boolean isVocab;
 
     Toolbar top_bar;
     View mView;
@@ -30,7 +36,7 @@ public class kanjiviewFragment extends android.support.v4.app.Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.kanji_view, container, false);
         mView = view;
-
+        mActivity = ((searchActivity) getActivity());
         TextView kanji_display = view.findViewById(R.id.kanji_display);
 
         TextView jlpt_title = view.findViewById(R.id.jlpt_title);
@@ -60,6 +66,12 @@ public class kanjiviewFragment extends android.support.v4.app.Fragment {
 
 
         entry = (KEntry) this.getArguments().getSerializable("KANJI");
+        isVocab = (Boolean) this.getArguments().getSerializable("ISVOCAB");
+        mActivity.getmDrawerToggle().setDrawerIndicatorEnabled(false);
+        //mActivity.getSupportActionBar().setHomeButtonEnabled(true);
+        mActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        setHasOptionsMenu(true);
 
         kanji_display.setText(entry.getKanji());
         if(entry.getJlpt() != 0)
@@ -154,6 +166,58 @@ public class kanjiviewFragment extends android.support.v4.app.Fragment {
             freq_title.setVisibility(TextView.GONE);
         }
     return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if (!isVocab)
+            inflater.inflate(R.menu.entry_view_menu, menu);
+        //else
+        //    inflater.inflate(R.menu.vocab_entry_view_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (!isVocab) {
+            switch (item.getItemId()) {
+                case R.id.entry_add:
+                    vocabFragment kvf = new vocabFragment();
+                    Bundle tof = new Bundle();
+                    tof.putSerializable("TOADD", entry);
+                    kvf.setArguments(tof);
+                    kanjiviewFragment sf;
+                    android.support.v4.app.FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+                    ft.add(R.id.main_fragment, kvf)
+                            .addToBackStack(null);
+                    if ((sf = (kanjiviewFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.main_fragment)) != null) {
+                        ft.hide(sf);
+                    }
+                    ft.commit();
+                    break;
+                case android.R.id.home:
+                    mActivity.onBackPressed();
+                    break;
+            }
+        } else {
+            switch (item.getItemId()) {
+                //case R.id.vocab_entry_delete:
+                //    break;
+                case android.R.id.home:
+                    mActivity.onBackPressed();
+                    break;
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        if(!isVocab)
+            mActivity.getmDrawerToggle().setDrawerIndicatorEnabled(true);
     }
 
 }

@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.miz.misho.Enum.Permissions;
 import com.miz.misho.Objects.DEntry;
+import com.miz.misho.Objects.KEntry;
 import com.miz.misho.Objects.PosTextView;
 import com.miz.misho.Objects.VocabList;
 import com.miz.misho.Utilties.FileUtil;
@@ -41,10 +42,11 @@ public class vocabViewFragment extends Fragment {
 
 
     FileUtil fileUtil;
-    ArrayList<DEntry> list;
+    ArrayList<Object> list;
     VocabList vlist;
     Boolean isEntry;
     String path;
+    searchActivity mActivity;
 
 
 
@@ -95,21 +97,17 @@ public class vocabViewFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        if (ContextCompat.checkSelfPermission(this.getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.d("Misho", "No permission for writing to external directory");
-            ActivityCompat.requestPermissions(this.getActivity(),new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Permissions.MISHO_WRITE_TO_EXTERNAL_STORAGE.getVal());
         }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_vocab, container, false);
         isEntry = true;
-        toolbar_title = getActivity().findViewById(R.id.toolbar_title);
+        mActivity = (searchActivity)getActivity();
+        toolbar_title = mActivity.findViewById(R.id.toolbar_title);
 
-        list = (ArrayList<DEntry>) this.getArguments().getSerializable("VLIST");
+        list = (ArrayList<Object>) this.getArguments().getSerializable("VLIST");
         vlist = (VocabList) this.getArguments().getSerializable("VOLIST");
         path = (String) this.getArguments().getSerializable("PATH");
         selected = new boolean[list.size()];
@@ -127,8 +125,9 @@ public class vocabViewFragment extends Fragment {
         setHasOptionsMenu(true);
         toolbar_title.setText("List: "+vlist.getName());
         fileUtil = ((searchActivity) this.getActivity()).getFileUtil();
-        //fileUtil.createRootIfNotExists();
-        //vl = fileUtil.scanFiles();
+        mActivity.getmDrawerToggle().setDrawerIndicatorEnabled(false);
+        //mActivity.getSupportActionBar().setHomeButtonEnabled(true);
+        mActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         return view;
     }
     @Override
@@ -141,7 +140,10 @@ public class vocabViewFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.vocabview_delete:
-                mActionMode = ((searchActivity)getActivity()).getDelegate().startSupportActionMode(amc);
+                mActionMode = mActivity.getDelegate().startSupportActionMode(amc);
+                break;
+            case android.R.id.home:
+                mActivity.onBackPressed();
                 break;
         }
         return true;
@@ -155,6 +157,7 @@ public class vocabViewFragment extends Fragment {
     public void onDestroy(){
         super.onDestroy();
         toolbar_title.setText("");
+        mActivity.getmDrawerToggle().setDrawerIndicatorEnabled(true);
     }
 
     public void resetStates(boolean b) {
@@ -206,26 +209,6 @@ public class vocabViewFragment extends Fragment {
                 case "suru verb - irregular":
                     ll.addView(new PosTextView(getActivity(), "Suru V.", getResources().getDrawable(R.drawable.suru_verb)));
                     break;
-                    /*
-                    <!ENTITY adj-i "adjective (keiyoushi)">
-<!ENTITY adj-ix "adjective (keiyoushi) - yoi/ii class">
-<!ENTITY adj-na "adjectival nouns or quasi-adjectives (keiyodoshi)">
-<!ENTITY adj-no "nouns which may take the genitive case particle `no'">
-<!ENTITY adj-pn "pre-noun adjectival (rentaishi)">
-<!ENTITY adj-t "`taru' adjective">
-<!ENTITY adj-f "noun or verb acting prenominally">
-<!ENTITY adv "adverb (fukushi)">
-<!ENTITY adv-to "adverb taking the `to' particle">
-
-<!ENTITY n "noun (common) (futsuumeishi)">
-<!ENTITY n-adv "adverbial noun (fukushitekimeishi)">
-<!ENTITY n-suf "noun, used as a suffix">
-<!ENTITY n-pref "noun, used as a prefix">
-<!ENTITY n-t "noun (temporal) (jisoumeishi)">
-
-<!ENTITY hon "honorific or respectful (sonkeigo) language">
-<!ENTITY hum "humble (kenjougo) language">
-                     */
             }
         }
     }
@@ -255,20 +238,21 @@ public class vocabViewFragment extends Fragment {
                     selected[getAdapterPosition()] = true;
                     return;
                 }
-                /*
                 entryviewFragment evf = new entryviewFragment();
                 Bundle tof = new Bundle();
-                tof.putSerializable("ENTRY", results.get(this.getAdapterPosition()));
+                tof.putSerializable("ENTRY", ((DEntry) list.get(this.getAdapterPosition())));
+                tof.putSerializable("ISVOCAB", true);
+                //tof.putSerializable("POSITION", this.getAdapterPosition());
                 evf.setArguments(tof);
-                searchFragment sf;
+                vocabViewFragment vvf;
                 android.support.v4.app.FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
                 ft.add(R.id.main_fragment, evf)
                         .addToBackStack(null);
-                if ((sf = (searchFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.main_fragment)) != null) {
-                    ft.hide(sf);
+                if ((vvf = (vocabViewFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.main_fragment)) != null) {
+                    ft.hide(vvf);
                 }
                 ft.commit();
-*/
+
             }
 
             @Override
@@ -285,39 +269,51 @@ public class vocabViewFragment extends Fragment {
 
         class kdictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
             public TextView ktv, kdtv;
+            public LinearLayout kanji_result;
 
             public kdictViewHolder(View view) {
                 super(view);
                 ktv = view.findViewById(R.id.text_kanji);
                 kdtv = view.findViewById(R.id.text_kdefs);
+                kanji_result = view.findViewById(R.id.kanji_result);
                 view.setOnClickListener(this);
                 view.setOnLongClickListener(this);
             }
 
             @Override
             public void onClick(View view) {
-                /*
+                if(mActionMode != null) {
+                    view.setSelected(!view.isSelected());
+                    selected[getAdapterPosition()] = true;
+                    return;
+                }
                 kanjiviewFragment kvf = new kanjiviewFragment();
                 Bundle tof = new Bundle();
-                tof.putSerializable("KANJI", kresult.get(this.getAdapterPosition()));
+                tof.putSerializable("KANJI", ((KEntry)list.get(this.getAdapterPosition())));
+                tof.putSerializable("ISVOCAB", true);
+                //tof.putSerializable("POSITION", this.getAdapterPosition());
                 kvf.setArguments(tof);
-                searchFragment sf;
+                vocabViewFragment vvf;
                 android.support.v4.app.FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
                 ft.add(R.id.main_fragment, kvf)
                         .addToBackStack(null);
-                if ((sf = (searchFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.main_fragment)) != null) {
-                    ft.hide(sf);
+                if ((vvf = (vocabViewFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.main_fragment)) != null) {
+                    ft.hide(vvf);
                 }
                 ft.commit();
-                //startActivity(kanjiIntent);
-            */
+
             }
 
 
             @Override
             public boolean onLongClick(View view) {
-                view.setSelected(!view.isSelected());
-                return true;
+                if(mActionMode == null) {
+                    mActionMode = ((searchActivity)getActivity()).getDelegate().startSupportActionMode(amc);
+                    view.setSelected(!view.isSelected());
+                    selected[getAdapterPosition()] = true;
+                    return true;
+                }
+                return false;
             }
 
 
@@ -343,7 +339,7 @@ public class vocabViewFragment extends Fragment {
             switch (holder.getItemViewType()) {
                 case 1:
                     vEntryListView.dictViewHolder dvh = (vEntryListView.dictViewHolder) holder;
-                    DEntry temp = list.get(position);
+                    DEntry temp = (DEntry) list.get(position);
                     dvh.tv_word.setText(temp.kreading.get(0));
                     String read = "(" + temp.reading.get(0) + ")";
                     dvh.tv_read.setText(read);
@@ -362,16 +358,17 @@ public class vocabViewFragment extends Fragment {
                     dvh.entry_layout.setSelected(selected[position]);
                     break;
                 case 0:
-                    searchFragment.mainListView.kdictViewHolder kdvh = (searchFragment.mainListView.kdictViewHolder) holder;
-                    //kdvh.ktv.setText(list.get(position).getKanji());
-                   // kdvh.kdtv.setText(list.get(position).getMeaning().toString().replaceAll("\\[|\\]", ""));
+                    vEntryListView.kdictViewHolder kdvh = (vEntryListView.kdictViewHolder) holder;
+                    kdvh.ktv.setText(((KEntry) list.get(position)).getKanji());
+                    kdvh.kdtv.setText(((KEntry) list.get(position)).getMeaning().toString().replaceAll("\\[|\\]", ""));
+                    kdvh.kanji_result.setSelected(selected[position]);
                     break;
             }
         }
 
         @Override
         public int getItemViewType(int position) {
-            if (isEntry)
+            if (list.get(position) instanceof DEntry)
                 return 1;
             else
                 return 0;

@@ -40,6 +40,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
             <View
+                android:id="@+id/rad_divider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/colorPrimaryDarkDT"/>

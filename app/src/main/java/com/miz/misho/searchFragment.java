@@ -112,14 +112,15 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
     ActionBarDrawerToggle mDrawerToggle;
 
     View mView;
+    View rad_divider;
 
 
     boolean[] radselected;
 
     boolean isDark;
 
-    Cursor dEntryC;
-    Cursor kEntryC;
+    //Cursor dEntryC;
+    //Cursor kEntryC;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -146,6 +147,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         dds = view.findViewById(R.id.ddSearch);
         lo_main = view.findViewById(R.id.lo_main);
         lo_bot = view.findViewById(R.id.lo_bottom);
+        rad_divider = view.findViewById(R.id.rad_divider);
 
         rKanView = view.findViewById(R.id.lv_kanji);
         rRadView = view.findViewById(R.id.lv_rads);
@@ -212,6 +214,10 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
                     kjs.setVisibility(View.GONE);
                     dds.setVisibility(View.VISIBLE);
                 } else {
+                    if(mSP.getString("search_preference", "Offline JMDict").equalsIgnoreCase("Jisho")) {
+                        tl.getTabAt(0).select();
+                        return;
+                    }
                     dds.setVisibility(View.GONE);
                     kjs.setVisibility(View.VISIBLE);
                 }
@@ -250,6 +256,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
 
         rKanView.setVisibility(View.GONE);
         rRadView.setVisibility(View.GONE);
+        rad_divider.setVisibility(View.GONE);
         radButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -332,6 +339,13 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
                 createToast("Searched for \"" + kanified + "\"");
             rMainAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(mSP.getString("search_preference", "Offline JMDict").equalsIgnoreCase("Jisho"))
+            tl.getTabAt(0).select();
     }
 
     public class ASynchSearchWeb extends AsyncTask<Void, Void, Integer> {
@@ -428,9 +442,12 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         if (rRadView.getVisibility() == View.GONE && rKanView.getVisibility() == View.GONE) {
             rRadView.setVisibility(View.VISIBLE);
             rKanView.setVisibility(View.VISIBLE);
+            rad_divider.setVisibility(View.VISIBLE);
+
         } else {
             rRadView.setVisibility(View.GONE);
             rKanView.setVisibility(View.GONE);
+            rad_divider.setVisibility(View.GONE);
         }
     }
 
@@ -519,10 +536,8 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         if (tl.getSelectedTabPosition() == 0) {
             if (mSP.getString("search_preference", "Offline JMDict").equalsIgnoreCase("Jisho")) {
                 webSearch(view);
-                // add applicable catches (error with json, error getting info from misho etc..
             } else {
                 dbSearch(view);
-                // add / sqlite error(somehow can't read from db
             }
         } else if (tl.getSelectedTabPosition() == 1) {
             if (mSP.getString("search_preference", "Offline JMDict").equalsIgnoreCase("Jisho")) {
@@ -610,6 +625,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
                 entryviewFragment evf = new entryviewFragment();
                 Bundle tof = new Bundle();
                 tof.putSerializable("ENTRY", results.get(this.getAdapterPosition()));
+                tof.putSerializable("ISVOCAB", false);
                 evf.setArguments(tof);
                 searchFragment sf;
                 android.support.v4.app.FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
@@ -638,6 +654,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
                 kanjiviewFragment kvf = new kanjiviewFragment();
                 Bundle tof = new Bundle();
                 tof.putSerializable("KANJI", kresult.get(this.getAdapterPosition()));
+                tof.putSerializable("ISVOCAB", false);
                 kvf.setArguments(tof);
                 searchFragment sf;
                 android.support.v4.app.FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
@@ -713,7 +730,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
                 return kresult.size();
         }
     }
-
+/*
     class mainListViewC extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         class dictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -733,7 +750,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
 
             @Override
             public void onClick(View view) {
-                /*
+
                 entryviewFragment evf = new entryviewFragment();
                 Bundle tof = new Bundle();
                 dEntryC.move(this.getAdapterPosition());
@@ -747,7 +764,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
                     ft.hide(sf);
                 }
                 ft.commit();
-*/
+
             }
         }
 
@@ -763,7 +780,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
 
             @Override
             public void onClick(View view) {
-                /*
+
                 kanjiviewFragment kvf = new kanjiviewFragment();
                 Bundle tof = new Bundle();
                 tof.putSerializable("KANJI", kresult.get(this.getAdapterPosition()));
@@ -777,7 +794,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
                 }
                 ft.commit();
                 //startActivity(kanjiIntent);
-            */
+
             }
 
         }
@@ -851,7 +868,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
                     return 0;
         }
     }
-
+*/
     class radListView extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         class radViewHolder extends RecyclerView.ViewHolder {

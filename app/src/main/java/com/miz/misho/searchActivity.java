@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.miz.misho.Enum.Preferences;
 import com.miz.misho.Utilties.DBUtil;
@@ -36,6 +37,7 @@ public class searchActivity extends AppCompatActivity {
     SharedPreferences mSP;
     searchFragInterface searchFragInterface;
     vocabFragInterface vocabFragInterface;
+    TextView toolbar_title;
 
 
     Typeface font;
@@ -151,6 +153,13 @@ public class searchActivity extends AppCompatActivity {
         if (dr_main.isDrawerOpen(GravityCompat.START)) {
             dr_main.closeDrawer(GravityCompat.START);
             mDrawerToggle.syncState();
+            return;
+        }
+        if(getSupportFragmentManager().findFragmentById(R.id.main_fragment) instanceof vocabFragment) {
+            if(!((vocabFragment)mFragment).relpath.equals(fileUtil.getRootdir())) {
+                ((vocabFragment)mFragment).goUpDir();
+                return;
+            }
         }
             super.onBackPressed();
     }

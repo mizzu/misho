@@ -56,10 +56,10 @@ public FileUtil(Context context){
         toFileOOS.close();
     }
 
-    public void overwriteEList(String name, ArrayList<DEntry> list, String dir) throws IOException {
+    public void overwriteEList(String name, ArrayList<Object> list, String dir) throws IOException {
         createRootIfNotExists();
         File toAdd = new File(dir+File.separator+name+entryend);
-        ArrayList<DEntry> toFile = list;
+        ArrayList<Object> toFile = list;
         ObjectOutputStream toFileOOS = new ObjectOutputStream(new FileOutputStream(toAdd));
         toFileOOS.writeObject(toFile);
         toFileOOS.flush();
@@ -80,9 +80,9 @@ public FileUtil(Context context){
     return toDelete.delete();
     }
 
-    public boolean addToEList(DEntry e, File f) throws IOException, ClassNotFoundException {
+    public boolean addToEList(File f, Object e) throws IOException, ClassNotFoundException {
     ObjectInputStream toAppendOIS = new ObjectInputStream(new FileInputStream(f));
-    ArrayList<DEntry> curr = (ArrayList<DEntry>) toAppendOIS.readObject();
+    ArrayList<Object> curr = (ArrayList<Object>) toAppendOIS.readObject();
     curr.add(e);
     toAppendOIS.close();
     ObjectOutputStream toAppendOOS = new ObjectOutputStream(new FileOutputStream(f, false));
@@ -91,6 +91,19 @@ public FileUtil(Context context){
     toAppendOOS.close();
     return true;
 }
+
+    public boolean removeFromEList(String dir, int position) throws IOException, ClassNotFoundException {
+        File f = new File(dir);
+        ObjectInputStream toDelete = new ObjectInputStream(new FileInputStream(f));
+        ArrayList<Object> curr = (ArrayList<Object>) toDelete.readObject();
+        toDelete.close();
+        curr.remove(position);
+        ObjectOutputStream toAppendOOS = new ObjectOutputStream(new FileOutputStream(f, false));
+        toAppendOOS.writeObject(curr);
+        toAppendOOS.flush();
+        toAppendOOS.close();
+        return true;
+    }
 
     public void batchDelete(ArrayList<String> paths) throws IOException {
     for(String s : paths) {
@@ -109,12 +122,12 @@ public FileUtil(Context context){
     }
 }
 
-    public void batchAdd(ArrayList<String> paths, DEntry entry) throws IOException, ClassNotFoundException {
+    public void batchAdd(ArrayList<String> paths, Object entry) throws IOException, ClassNotFoundException {
         for(String s : paths) {
             File f = new File(s+entryend);
             if(!f.exists())
                 continue;
-            addToEList(entry, f);
+            addToEList(f, entry);
         }
     }
 

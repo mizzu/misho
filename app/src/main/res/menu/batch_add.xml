@@ -5,6 +5,6 @@
         android:id="@+id/batch_cancel"/>
 
     <item
-        android:title="Delete"
+        android:title="Add"
         android:id="@+id/batch_confirm"/>
 </menu>
