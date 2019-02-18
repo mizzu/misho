@@ -2,19 +2,19 @@ This is still a work in development. A more structured readme will be pe provide
 
 The app in its current state works, however it is fairly limited and bug/crashes will occur.
 
-Supported:
-Radical Search
-Romaji conversion
-Multiple search options for both kanji and word dictionaries
-Vocabulary lists
-Use Jisho (online) or JMDict(offline) (search by kanji isn't supported for Jisho due to API limits)
+Supported:  
+Radical Search  
+Romaji conversion  
+Multiple search options for both kanji and word dictionaries  
+Vocabulary lists  
+Use Jisho (online) or JMDict(offline) (search by kanji isn't supported for Jisho due to API limits)  
 
 Upcoming:
-Vocabulary study
-Radicals used in kanji
-Words containing searched kanji
-Conjugator for verbs
-Kanji in searched words
+Vocabulary study  
+Radicals used in kanji  
+Words containing searched kanji  
+Conjugator for verbs  
+Kanji in searched words  
 
 # License
 
