@@ -9,7 +9,7 @@ Multiple search options for both kanji and word dictionaries
 Vocabulary lists  
 Use Jisho (online) or JMDict(offline) (search by kanji isn't supported for Jisho due to API limits)  
 
-Upcoming:
+Upcoming:  
 Vocabulary study  
 Radicals used in kanji  
 Words containing searched kanji  
