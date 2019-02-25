@@ -1,6 +1,7 @@
 package com.miz.misho;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -144,6 +145,11 @@ public class vocabViewFragment extends Fragment {
                 break;
             case android.R.id.home:
                 mActivity.onBackPressed();
+                break;
+            case R.id.vocabview_study:
+                Intent toStudy = new Intent(mActivity, studyActivity.class);
+                toStudy.putExtra("LIST", list);
+                startActivity(toStudy);
                 break;
         }
         return true;

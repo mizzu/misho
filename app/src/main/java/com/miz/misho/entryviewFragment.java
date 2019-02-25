@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -54,7 +55,9 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.entry_view, container, false);
         mView = view;
-        mActivity = ((searchActivity) getActivity());
+        mActivity = null;
+        if(getActivity() instanceof searchActivity)
+            mActivity =  (searchActivity) getActivity();
         rSenseView = view.findViewById(R.id.sense_lv);
         rSenseManager = new LinearLayoutManager(getActivity());
         rSenseView.setLayoutManager(rSenseManager);
@@ -68,13 +71,15 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
         ev_wholder = view.findViewById(R.id.ev_wholder);
         ll_reb = view.findViewById(R.id.ll_reb);
         top_bar = view.findViewById(R.id.top_bar);
-        fileUtil = mActivity.getFileUtil();
+        if(mActivity != null) {
+            fileUtil = mActivity.getFileUtil();
 
-        mActivity.getmDrawerToggle().setDrawerIndicatorEnabled(false);
-        //mActivity.getSupportActionBar().setHomeButtonEnabled(true);
-        mActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            mActivity.getmDrawerToggle().setDrawerIndicatorEnabled(false);
+            //mActivity.getSupportActionBar().setHomeButtonEnabled(true);
+            mActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        setHasOptionsMenu(true);
+            setHasOptionsMenu(true);
+        }
 /*
         if(isDark){
             rSenseView.setBackgroundColor(getResources().getColor(R.color.colorBGDT));
@@ -260,7 +265,7 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
                     mActivity.onBackPressed();
                     break;
             }
-        } else {
+        } else { if(mActivity != null) {
             switch (item.getItemId()) {
                 //case R.id.vocab_entry_delete:
                 //    break;
@@ -268,6 +273,7 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
                     mActivity.onBackPressed();
                     break;
             }
+        }
         }
         return super.onOptionsItemSelected(item);
     }

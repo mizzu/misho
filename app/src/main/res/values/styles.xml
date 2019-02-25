@@ -2,11 +2,13 @@
 
 
     <style name="normalTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowNoTitle">true</item>
         <item name="android:itemBackground">@drawable/rad_toggle</item>
         <item name="windowActionModeOverlay">true</item>
     </style>
 
     <style name="darkTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="windowNoTitle">true</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="android:textColorPrimary">@color/colorBG</item>
         <item name="android:itemBackground">@drawable/rad_toggle</item>

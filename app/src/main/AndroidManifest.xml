@@ -37,7 +37,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.miz.misho.preferencesActivity"></activity>
+        <activity android:name="com.miz.misho.preferencesActivity"/>
+        <activity android:name="com.miz.misho.studyActivity"/>
 
         </application>
 

@@ -27,9 +27,13 @@
     <string name="freq">Frequency:</string>
     <string name="radicals">Radicals</string>
 
+    <string name="show">Show</string>
     <string name="dr_search">Search</string>
     <string name="dr_settings">Settings</string>
     <string name="dr_vocab">Vocab</string>
+
+    <string name="study_know">Know</string>
+    <string name="study_notknow">Don\'t Know</string>
 
     <!-- DB strings -->
     <string name="n">noun (common) (futsuumeishi)</string>

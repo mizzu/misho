@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+<include layout="@layout/toolbar_study"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorPrimaryDarkDT"/>
+
+    <FrameLayout
+        android:id="@+id/study_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorPrimaryDarkDT"/>
+
+    <LinearLayout
+        android:id="@+id/ll_studybutton"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="bottom|fill"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/study_unknown"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="doNotKnow"
+            android:text="@string/study_notknow" />
+
+        <Button
+            android:id="@+id/study_show"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="toggleDef"
+            android:text="@string/show" />
+
+        <Button
+            android:id="@+id/study_known"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="doKnow"
+            android:text="@string/study_know" />
+
+    </LinearLayout>
+    </LinearLayout>

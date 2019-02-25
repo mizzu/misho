@@ -387,8 +387,29 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
         bl.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                ListView lw = ((AlertDialog)dialogInterface).getListView();
+                //placeholder
+            }
+        });
+        bl.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+        final AlertDialog dl = bl.create();
+        dl.show();
+        dl.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ListView lw = dl.getListView();
                 try {
+                    if(fileUtil.getForbiddenCharsPattern().matcher(input.getText().toString()).find()) {
+                        createToast("File/Directory cannot contain the characters: " + fileUtil.getForbiddenChars());
+                        return;
+                    } else if (input.getText().toString().trim().isEmpty()) {
+                        createToast("Empty name");
+                        return;
+                    }
                     if(lw.getCheckedItemPosition() == 0)
                         fileUtil.mkDir(input.getText().toString(), relpath);
                     else
@@ -399,13 +420,6 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
                 rescan();
             }
         });
-        bl.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-        bl.show();
     }
 
     @Override

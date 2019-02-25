@@ -18,18 +18,29 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class FileUtil {
 Context mContext;
 private String rootdir;
 private final String entryend = ".deml";
-private final String kentryend = ".keml";
+private final String forbiddenChars = "|\\?*<\":>+[]/'.";
+private final Pattern forbiddenCharsPattern = Pattern.compile("[\\\\|?*<\":>+\\[\\]/'.]+");
 
 
 public FileUtil(Context context){
     mContext = context;
    rootdir = Environment.getExternalStorageDirectory().getAbsolutePath() +File.separator+"MishoLists";
 }
+
+
+    public String getForbiddenChars() {
+        return forbiddenChars;
+    }
+
+    public Pattern getForbiddenCharsPattern() {
+        return forbiddenCharsPattern;
+    }
 
     public String getRootdir() {
         return rootdir;
@@ -135,7 +146,7 @@ public FileUtil(Context context){
     File root = new File(dir);
     ArrayList<VocabList> vl = new ArrayList<>();
         for(File f : root.listFiles()) {
-            if(f.getName().endsWith(entryend) || f.getName().endsWith(kentryend)) {
+            if(f.getName().endsWith(entryend)) {
              vl.add(new VocabList(f.getName().substring(0, f.getName().length()-5), 0));
             } else if(f.isDirectory()) {
                 vl.add(new VocabList(f.getName(), -1));
@@ -150,7 +161,7 @@ public FileUtil(Context context){
         File root = new File(rootdir);
         ArrayList<String> vl = new ArrayList<>();
         for(File f : root.listFiles()) {
-            if(f.getName().endsWith(entryend) || f.getName().endsWith(kentryend)) {
+            if(f.getName().endsWith(entryend)) {
                 vl.add(f.getName().substring(0, f.getName().length()-5));
             }
         }

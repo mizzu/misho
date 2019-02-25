@@ -36,7 +36,9 @@ public class kanjiviewFragment extends android.support.v4.app.Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.kanji_view, container, false);
         mView = view;
-        mActivity = ((searchActivity) getActivity());
+        mActivity = null;
+        if(getActivity() instanceof  searchActivity)
+            mActivity = ((searchActivity) getActivity());
         TextView kanji_display = view.findViewById(R.id.kanji_display);
 
         TextView jlpt_title = view.findViewById(R.id.jlpt_title);
@@ -67,12 +69,14 @@ public class kanjiviewFragment extends android.support.v4.app.Fragment {
 
         entry = (KEntry) this.getArguments().getSerializable("KANJI");
         isVocab = (Boolean) this.getArguments().getSerializable("ISVOCAB");
-        mActivity.getmDrawerToggle().setDrawerIndicatorEnabled(false);
-        //mActivity.getSupportActionBar().setHomeButtonEnabled(true);
-        mActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        setHasOptionsMenu(true);
+        if(mActivity != null) {
+            mActivity.getmDrawerToggle().setDrawerIndicatorEnabled(false);
+            //mActivity.getSupportActionBar().setHomeButtonEnabled(true);
+            mActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+            setHasOptionsMenu(true);
+        }
         kanji_display.setText(entry.getKanji());
         if(entry.getJlpt() != 0)
             jlpt_ph.setText(Integer.toString(entry.getJlpt()));
@@ -202,12 +206,14 @@ public class kanjiviewFragment extends android.support.v4.app.Fragment {
                     break;
             }
         } else {
-            switch (item.getItemId()) {
-                //case R.id.vocab_entry_delete:
-                //    break;
-                case android.R.id.home:
-                    mActivity.onBackPressed();
-                    break;
+            if(mActivity != null) {
+                switch (item.getItemId()) {
+                    //case R.id.vocab_entry_delete:
+                    //    break;
+                    case android.R.id.home:
+                        mActivity.onBackPressed();
+                        break;
+                }
             }
         }
         return super.onOptionsItemSelected(item);
