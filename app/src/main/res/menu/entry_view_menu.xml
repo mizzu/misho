@@ -8,4 +8,12 @@
         android:icon="@android:drawable/ic_input_add"
         android:title="Add"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/entry_quickadd"
+        android:actionLayout="@layout/toolbar"
+        android:icon="@android:drawable/ic_menu_rotate"
+        android:title="QuickAdd"
+        app:showAsAction="always" />
+
 </menu>

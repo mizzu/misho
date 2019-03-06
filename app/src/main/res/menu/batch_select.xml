@@ -5,6 +5,11 @@
         android:id="@+id/batch_cancel"/>
 
     <item
+        android:title="Move"
+        android:id="@+id/batch_move"/>
+
+    <item
         android:title="Delete"
         android:id="@+id/batch_delete"/>
+
 </menu>

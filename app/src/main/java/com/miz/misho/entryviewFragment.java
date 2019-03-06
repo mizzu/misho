@@ -1,10 +1,12 @@
 package com.miz.misho;
 
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.ActionMenuItem;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,13 +19,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.miz.misho.Objects.DEntry;
+import com.miz.misho.Objects.VocabList;
 import com.miz.misho.Utilties.FileUtil;
+import com.miz.misho.Utilties.XMLUtil;
 
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
+import java.util.ArrayList;
 
 public class entryviewFragment extends android.support.v4.app.Fragment {
     DEntry entry;
@@ -39,11 +47,14 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
     android.support.v7.widget.Toolbar top_bar;
     LinearLayout ev_wholder;
 
+    addToEListASynchTask addToEListASynchTask;
+
     boolean isVocab;
     int vocabPosition;
 
     View mView;
     FileUtil fileUtil;
+    XMLUtil xmlUtil;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -73,6 +84,7 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
         top_bar = view.findViewById(R.id.top_bar);
         if(mActivity != null) {
             fileUtil = mActivity.getFileUtil();
+            xmlUtil = mActivity.getXmlUtil();
 
             mActivity.getmDrawerToggle().setDrawerIndicatorEnabled(false);
             //mActivity.getSupportActionBar().setHomeButtonEnabled(true);
@@ -242,9 +254,36 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    class addToEListASynchTask extends AsyncTask<Void, Void, Integer> {
+        VocabList vl;
+
+        public addToEListASynchTask(VocabList vl){
+            this.vl = vl;
+        }
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            try {
+                fileUtil.addToEList(new File(vl.getPath() + fileUtil.getEntryend()), entry);
+            } catch (Exception e) {
+                return 1;
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            switch(result) {
+                case 0:createToast("Added to " + vl.getName());
+                return;
+                case 1:createToast("Error adding to list");
+            }
+        }
+    }
+
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         if (!isVocab) {
             switch (item.getItemId()) {
                 case R.id.entry_add:
@@ -260,6 +299,26 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
                         ft.hide(sf);
                     }
                     ft.commit();
+                    break;
+                case R.id.entry_quickadd:
+                    final ArrayList<VocabList> qvl = mActivity.getQuickAdd();
+                        if(qvl.isEmpty())
+                            return false;
+                        PopupMenu pm = new PopupMenu(getContext(), mActivity.findViewById(R.id.entry_quickadd));
+                        int i = 0;
+                        for(VocabList vl : qvl) {
+                            pm.getMenu().add(0, i, 0, vl.getName());
+                            i++;
+                        }
+                        pm.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem menuItem) {
+                                addToEListASynchTask = new addToEListASynchTask(qvl.get(menuItem.getItemId()));
+                                addToEListASynchTask.execute();
+                                return true;
+                            }
+                        });
+                        pm.show();
                     break;
                 case android.R.id.home:
                     mActivity.onBackPressed();

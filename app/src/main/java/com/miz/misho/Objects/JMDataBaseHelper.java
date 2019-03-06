@@ -15,7 +15,7 @@ import java.io.OutputStream;
 public class JMDataBaseHelper extends SQLiteOpenHelper {
     private static JMDataBaseHelper sInstance;
     private Context mc;
-    private String DB_PATH = "/data/data/" + BuildConfig.APPLICATION_ID + "/databases/";
+    private String DB_PATH;
     public SQLiteDatabase mdb;
     private static final String DB_NAME = "kjmde.db";
     private static final int DB_VERSION = 2;
@@ -23,6 +23,7 @@ public class JMDataBaseHelper extends SQLiteOpenHelper {
     public JMDataBaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
         this.mc = context;
+        DB_PATH = mc.getFilesDir().getPath() + File.separator + BuildConfig.APPLICATION_ID + "/databases/";
         if (checkDB()) {
             this.getWritableDatabase();
             try {
@@ -66,6 +67,9 @@ public class JMDataBaseHelper extends SQLiteOpenHelper {
     private void copyDB() throws IOException {
         InputStream dbi = mc.getAssets().open(DB_NAME);
         String out = DB_PATH + DB_NAME;
+        File f = new File(DB_PATH);
+        if(!f.exists())
+            f.mkdirs();
         OutputStream outs = new FileOutputStream(out);
         byte[] buff = new byte[1024];
         int length;
@@ -81,7 +85,6 @@ public class JMDataBaseHelper extends SQLiteOpenHelper {
 
     public void openDB() {
         mdb = SQLiteDatabase.openDatabase(DB_PATH + DB_NAME, null, SQLiteDatabase.OPEN_READWRITE);
-        mdb.execSQL("PRAGMA cache_size = 10;");
     }
 
     public void close() {

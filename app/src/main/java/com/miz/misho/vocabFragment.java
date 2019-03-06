@@ -22,18 +22,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.miz.misho.Enum.Permissions;
-import com.miz.misho.Objects.DEntry;
 import com.miz.misho.Objects.VocabList;
 import com.miz.misho.Utilties.FileUtil;
+import com.miz.misho.Utilties.XMLUtil;
+
+import org.apache.commons.io.FileExistsException;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -44,7 +49,7 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
     RecyclerView.LayoutManager rVocabManager;
     RecyclerView.Adapter rVocabAdapter;
 
-
+    XMLUtil xmlUtil;
     FileUtil fileUtil;
     ArrayList<VocabList> vl;
     ArrayList<String> selectedPaths;
@@ -92,13 +97,14 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
         }
     };
 
-    ActionMode mActionModeBatchDelete;
-    ActionMode.Callback amcBatchDelete = new ActionMode.Callback() {
+    ActionMode mActionModeBatchSelect;
+    ActionMode.Callback amcBatchSelect = new ActionMode.Callback() {
+        boolean changed = false;
 
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mode.getMenuInflater().inflate(R.menu.batch_delete, menu);
+            mode.getMenuInflater().inflate(R.menu.batch_select, menu);
             return true;
         }
 
@@ -114,12 +120,42 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
                     //
                     mode.finish();
                     return true;
-                case R.id.batch_confirm:
+                case R.id.batch_delete:
                     try {
                         fileUtil.batchDelete(selectedPaths);
+                        boolean verify = false;
+                        for(String s : selectedPaths) {
+                            for(VocabList vl : mActivity.getQuickAdd()) {
+                                if(vl.getPath().equals(s))
+                                    verify = true;
+                            }
+                        }
+                        if(verify)
+                            mActivity.setQuickAdd(xmlUtil.getQuickAddList());
                     } catch (Exception e) {
                         createToast("Error batch deleting list");
                     }
+                    changed = true;
+                    mode.finish();
+                    return true;
+                case R.id.batch_move:
+                    try {
+                        fileUtil.batchMove(selectedPaths, relpath);
+                        boolean verify = false;
+                        for(String s : selectedPaths) {
+                            for(VocabList vl : mActivity.getQuickAdd()) {
+                                if(vl.getPath().equals(s)) {
+                                    verify = true;
+                                    xmlUtil.updateQuickAddNamePath(vl.getName(), vl.getPath(), vl.getName(), relpath + File.separator + vl.getName() );
+                                }
+                            }
+                        }
+                        if(verify)
+                            mActivity.setQuickAdd(xmlUtil.getQuickAddList());
+                    } catch (Exception e) {
+                        createToast("Error batch deleting list");
+                    }
+                    changed = true;
                     mode.finish();
                     return true;
                 default:
@@ -129,9 +165,10 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            mActionModeBatchDelete = null;
+            mActionModeBatchSelect = null;
             selectedPaths.clear();
-            rescan();
+            if(changed)
+                rescan();
         }
     };
 
@@ -142,8 +179,24 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
         if (ContextCompat.checkSelfPermission(this.getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             Log.d("Misho", "No permission for writing to external directory");
+            ActivityCompat.requestPermissions(this.getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Permissions.MISHO_WRITE_TO_EXTERNAL_STORAGE.getVal());
         }
-        ActivityCompat.requestPermissions(this.getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Permissions.MISHO_WRITE_TO_EXTERNAL_STORAGE.getVal());
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == Permissions.MISHO_WRITE_TO_EXTERNAL_STORAGE.getVal()) {
+            for(int i = 0; i < permissions.length; i++) {
+                if (permissions[i].equalsIgnoreCase(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                        createToast("Write to External Storage permissions required");
+                        mActivity.getSupportFragmentManager().popBackStackImmediate();
+                    }
+
+                }
+            }
+        }
 
     }
 
@@ -168,6 +221,7 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
             toAdd = null;
         }
         setHasOptionsMenu(true);
+        xmlUtil = mActivity.getXmlUtil();
         fileUtil = mActivity.getFileUtil();
         fileUtil.createRootIfNotExists();
         relpath = fileUtil.getRootdir();
@@ -195,19 +249,29 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
         class vListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
             public TextView name, size;
             public LinearLayout vl_layout;
+            public ImageButton options;
 
             public vListViewHolder(View view) {
                 super(view);
                 name = view.findViewById(R.id.text_vlname);
                 size = view.findViewById(R.id.text_vlsize);
                 vl_layout = view.findViewById(R.id.vl_layout);
+                options = view.findViewById(R.id.vl_more);
+
+                options.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        doListOptions(view, getAdapterPosition());
+                    }
+                });
+
                 view.setOnClickListener(this);
                 view.setOnLongClickListener(this);
             }
 
             @Override
             public void onClick(View view) {
-                if(mActionModeBatchDelete != null) {
+                if(mActionModeBatchSelect != null) {
                     vl_layout.setSelected(addRemoveSelected(relpath+File.separator+vl.get(getAdapterPosition()).getName()));
                     return;
                 }
@@ -238,8 +302,8 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
 
             @Override
             public boolean onLongClick(View view) {
-                if(mActionModeBatchDelete == null) {
-                    mActionModeBatchDelete = mActivity.getDelegate().startSupportActionMode(amcBatchDelete);
+                if(mActionModeBatchSelect == null) {
+                    mActionModeBatchSelect = mActivity.getDelegate().startSupportActionMode(amcBatchSelect);
                     view.setSelected(!view.isSelected());
                     selectedPaths.add(relpath+File.separator+vl.get(getAdapterPosition()).getName());
                     return true;
@@ -251,52 +315,57 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
         class vFolderHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
             public TextView name, size;
             public LinearLayout vl_layout;
+            public ImageButton options;
 
             public vFolderHolder(View view) {
                 super(view);
                 name = view.findViewById(R.id.text_vlname);
                 size = view.findViewById(R.id.text_vlsize);
                 vl_layout = view.findViewById(R.id.vl_layout);
+                options = view.findViewById(R.id.vl_more);
                 view.setOnClickListener(this);
                 view.setOnLongClickListener(this);
             }
 
             @Override
             public void onClick(View view) {
-                if(mActionModeBatchDelete != null) {
+                /*
+                if(mActionModeBatchSelect != null) {
                     vl_layout.setSelected(addRemoveSelected(relpath+File.separator+vl.get(getAdapterPosition()).getName()));
                     return;
                 }
+                */
                 relpath = relpath+File.separator+vl.get(getAdapterPosition()).getName();
                 rescan();
             }
 
             @Override
             public boolean onLongClick(View view) {
-                if(mActionModeBatchDelete == null) {
-                    mActionModeBatchDelete = mActivity.getDelegate().startSupportActionMode(amcBatchDelete);
+                /*
+                if(mActionModeBatchSelect == null) {
+                    mActionModeBatchSelect = mActivity.getDelegate().startSupportActionMode(amcBatchSelect);
                     view.setSelected(!view.isSelected());
                     selectedPaths.add(relpath+File.separator+vl.get(getAdapterPosition()).getName());
                     return true;
                 }
+                */
                 return false;
             }
         }
 
         class vBackHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
             public TextView name, size;
+            public ImageButton options;
 
             public vBackHolder(View view) {
                 super(view);
                 name = view.findViewById(R.id.text_vlname);
+                options = view.findViewById(R.id.vl_more);
                 view.setOnClickListener(this);
             }
 
             @Override
             public void onClick(View view) {
-                if(mActionModeBatchDelete != null) {
-                    return;
-                }
                 goUpDir();
             }
         }
@@ -331,10 +400,12 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
                 case 1:
                     vFolderHolder vfh = (vFolderHolder) holder;
                     vfh.name.setText(vl.get(position).getName() + "(dir)");
+                    vfh.options.setVisibility(View.GONE);
                     vfh.vl_layout.setSelected(selectedPaths.contains(relpath+File.separator+vl.get(position).getName()));
                     break;
                 case 2:
                     vBackHolder vbh = (vBackHolder) holder;
+                    vbh.options.setVisibility(View.GONE);
                     vbh.name.setText(vl.get(position).getName());
             }
             //vlv.size.setText(Long.toString(vl.get(position).getSize()));
@@ -376,6 +447,11 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
     }
 
     public void doAdd(View view) {
+        if((ContextCompat.checkSelfPermission(this.getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED)) {
+            createToast("No permission to write to disk");
+            return;
+        }
         AlertDialog.Builder bl = new AlertDialog.Builder(view.getContext());
         bl.setTitle("Add Folder/List");
         final EditText input = new EditText(view.getContext());
@@ -404,7 +480,7 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
                 ListView lw = dl.getListView();
                 try {
                     if(fileUtil.getForbiddenCharsPattern().matcher(input.getText().toString()).find()) {
-                        createToast("File/Directory cannot contain the characters: " + fileUtil.getForbiddenChars());
+                        createToast("File/Directory cannot contain the characters:\n " + fileUtil.getForbiddenChars());
                         return;
                     } else if (input.getText().toString().trim().isEmpty()) {
                         createToast("Empty name");
@@ -414,8 +490,12 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
                         fileUtil.mkDir(input.getText().toString(), relpath);
                     else
                         fileUtil.addEList(input.getText().toString(), relpath);
-                } catch (Exception e) {
-                    createToast("Adding new folder/list failed");
+                    dl.dismiss();
+                } catch (FileExistsException e) {
+                    createToast("Folder/List already exists");
+                } catch (IOException e) {
+                    createToast("Error writing to disk\n(No permission or space)");
+                    dl.dismiss();
                 }
                 rescan();
             }
@@ -428,8 +508,8 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
             case R.id.vocab_add:
                 doAdd(getView());
                 break;
-            case R.id.vocab_delete:
-                mActionModeBatchDelete = mActivity.getDelegate().startSupportActionMode(amcBatchDelete);
+            case R.id.vocab_batch:
+                mActionModeBatchSelect = mActivity.getDelegate().startSupportActionMode(amcBatchSelect);
                 break;
         }
         return true;
@@ -438,6 +518,34 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
     public void goUpDir() {
         relpath = relpath.substring(0, relpath.lastIndexOf('/'));
         rescan();
+    }
+
+    public void doListOptions(View view, final int position){
+        PopupMenu pm = new PopupMenu(mActivity, view);
+        pm.getMenuInflater().inflate(R.menu.vocab_list_options, pm.getMenu());
+        pm.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.popup_addtoquick:
+                        for(VocabList ch : mActivity.getQuickAdd()) {
+                            if(ch.getPath().equalsIgnoreCase(vl.get(position).getPath())) {
+                                createToast("List already in quickadd");
+                                return true;
+                            }
+                        }
+                        try {
+                            xmlUtil.updateQuickAddNamePath("", "", vl.get(position).getName(), relpath + File.separator + vl.get(position).getName());
+                            mActivity.setQuickAdd(xmlUtil.getQuickAddList());
+                        } catch (Exception e) {
+                            createToast("Error updating XML file");
+                        }
+                        return true;
+                }
+                return false;
+            }
+        });
+        pm.show();
     }
 
 

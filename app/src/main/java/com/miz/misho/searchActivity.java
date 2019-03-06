@@ -1,7 +1,11 @@
 package com.miz.misho;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
@@ -9,24 +13,34 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.miz.misho.Enum.Permissions;
 import com.miz.misho.Enum.Preferences;
+import com.miz.misho.Objects.VocabList;
 import com.miz.misho.Utilties.DBUtil;
 import com.miz.misho.Utilties.FileUtil;
 import com.miz.misho.Utilties.WebUtil;
+import com.miz.misho.Utilties.XMLUtil;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class searchActivity extends AppCompatActivity {
 
@@ -34,10 +48,12 @@ public class searchActivity extends AppCompatActivity {
     WebUtil webUtil;
     DBUtil dbUtil;
     FileUtil fileUtil;
+    XMLUtil xmlUtil;
     SharedPreferences mSP;
     searchFragInterface searchFragInterface;
     vocabFragInterface vocabFragInterface;
     TextView toolbar_title;
+    Context mContext;
 
 
     Typeface font;
@@ -57,6 +73,7 @@ public class searchActivity extends AppCompatActivity {
 
     AppCompatDelegate mDelegate;
 
+    ArrayList<VocabList> quickAdd;
 
     boolean isDark;
 
@@ -69,6 +86,7 @@ public class searchActivity extends AppCompatActivity {
         else
             this.setTheme(android.R.style.Theme_Holo_Light_NoActionBar);
         super.onCreate(saveInstanceState);
+        mContext = this;
         setContentView(R.layout.activity_search);
         dr_main = findViewById(R.id.dr_main);
         top_bar = findViewById(R.id.top_bar);
@@ -83,6 +101,7 @@ public class searchActivity extends AppCompatActivity {
             searchFragInterface = (searchFragment) mFragment;
         } else {
             mFragment = getSupportFragmentManager().getFragment(saveInstanceState, "curr");
+            searchFragInterface = (searchFragment) mFragment;
         }
 
 
@@ -93,7 +112,15 @@ public class searchActivity extends AppCompatActivity {
         am = this.getAssets();
         webUtil = new WebUtil();
         fileUtil = new FileUtil(this);
-
+        try {
+            xmlUtil = new XMLUtil(this);
+            quickAdd = xmlUtil.getQuickAddList();
+        } catch (Exception e) {
+            Log.d("Misho", "Error initializing settings xml");
+        }
+        if (quickAdd == null) {
+            quickAdd = new ArrayList<>();
+        }
         mDrawerToggle = new ActionBarDrawerToggle(this, dr_main, R.string.freq, R.string.jlpt) {
 
         };
@@ -116,11 +143,17 @@ public class searchActivity extends AppCompatActivity {
                         ft.commit();
                         break;
                     case R.id.dr_vocab:
-                        mFragment = new vocabFragment();
-                        vocabFragInterface = (vocabFragInterface) mFragment;
-                        ft = getSupportFragmentManager().beginTransaction();
-                        ft.replace(R.id.main_fragment, mFragment, "curr");
-                        ft.commit();
+                        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                != PackageManager.PERMISSION_GRANTED) {
+                            Log.d("Misho", "No permission for writing to external directory");
+                            ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Permissions.MISHO_WRITE_TO_EXTERNAL_STORAGE.getVal());
+                        } else {
+                            mFragment = new vocabFragment();
+                            vocabFragInterface = (vocabFragInterface) mFragment;
+                            ft = getSupportFragmentManager().beginTransaction();
+                            ft.replace(R.id.main_fragment, mFragment, "curr");
+                            ft.commit();
+                        }
                         break;
                     case R.id.dr_settings:
                         intent = new Intent(searchActivity.this, preferencesActivity.class);
@@ -134,6 +167,34 @@ public class searchActivity extends AppCompatActivity {
             }
         });
         nv_main.getMenu().getItem(0).setChecked(true);
+    }
+
+
+    public void createToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == Permissions.MISHO_WRITE_TO_EXTERNAL_STORAGE.getVal()) {
+            for (int i = 0; i < permissions.length; i++) {
+                if (permissions[i].equalsIgnoreCase(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                        createToast("Write to External Storage permissions required for vocabulary");
+                        nv_main.setCheckedItem(R.id.dr_search);
+                    } else {
+                        FragmentTransaction ft;
+                        mFragment = new vocabFragment();
+                        vocabFragInterface = (vocabFragInterface) mFragment;
+                        ft = getSupportFragmentManager().beginTransaction();
+                        ft.replace(R.id.main_fragment, mFragment, "curr");
+                        ft.commit();
+                    }
+
+                }
+            }
+        }
     }
 
     @Override
@@ -235,6 +296,18 @@ public class searchActivity extends AppCompatActivity {
 
     public ActionBarDrawerToggle getmDrawerToggle() {
         return mDrawerToggle;
+    }
+
+    public XMLUtil getXmlUtil() {
+        return xmlUtil;
+    }
+
+    public ArrayList<VocabList> getQuickAdd() {
+        return quickAdd;
+    }
+
+    public void setQuickAdd(ArrayList<VocabList> quickAdd) {
+        this.quickAdd = quickAdd;
     }
 
     @Override

@@ -1,29 +1,25 @@
 package com.miz.misho;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.miz.misho.Enum.Permissions;
 import com.miz.misho.Objects.DEntry;
 import com.miz.misho.Objects.KEntry;
 import com.miz.misho.Objects.PosTextView;
@@ -54,7 +50,7 @@ public class vocabViewFragment extends Fragment {
     ActionMode mActionMode;
     boolean[] selected;
     ActionMode.Callback amc = new ActionMode.Callback() {
-
+        boolean changed;
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -71,11 +67,11 @@ public class vocabViewFragment extends Fragment {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch(item.getItemId()) {
                 case R.id.batch_cancel:
-                    resetStates(false);
                     mode.finish();
                     return true;
-                case R.id.batch_confirm:
+                case R.id.batch_delete:
                     resetStates(true);
+                    changed = true;
                         try {
                             fileUtil.overwriteEList(vlist.getName(), list, path);
                         } catch (Exception e) {
@@ -84,12 +80,15 @@ public class vocabViewFragment extends Fragment {
                     mode.finish();
                     return true;
                     default:
-                        return false;
+                        mode.finish();
+                        return true;
             }
         }
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
+            if(!changed)
+                resetStates(false);
             mActionMode = null;
         }
     };
@@ -119,7 +118,7 @@ public class vocabViewFragment extends Fragment {
         rVocabListView.setLayoutManager(rVocabListManager);
 
         rVocabListView.addItemDecoration(new DividerItemDecoration(rVocabListView.getContext(), DividerItemDecoration.VERTICAL));
-        rVocabListAdapter = new vEntryListView();
+        rVocabListAdapter = new vocabViewRecyclerView();
         rVocabListView.setAdapter(rVocabListAdapter);
 
 
@@ -182,48 +181,12 @@ public class vocabViewFragment extends Fragment {
             }
         }
 
-
-    public void addPos(LinearLayout ll, ArrayList<String> pos) {
-        for (String s : pos) {
-            String sw = s.replaceAll("\\[|\\]", "");
-            switch (sw) {
-                case "noun (common) (futsuumeishi)":
-                    ll.addView(new PosTextView(getActivity(), "noun (common)", getResources().getDrawable(R.drawable.normal_common)));
-                    break;
-                case "Godan verb - -aru special class":
-                case "Godan verb with `bu\\' ending":
-                case "Godan verb with `gu\\' ending":
-                case "Godan verb with `ku\\' ending":
-                case "Godan verb - Iku/Yuku special class":
-                case "Godan verb with `mu\\' ending":
-                case "Godan verb with `nu\\' ending":
-                case "Godan verb with `ru\\' ending":
-                case "Godan verb with `su\\' ending":
-                case "Godan verb with `tsu\\' ending":
-                case "Godan verb with `u\\' ending":
-                case "Godan verb with `u\\' ending (special class)":
-                    ll.addView(new PosTextView(getActivity(), "Godan", getResources().getDrawable(R.drawable.goichi_verb)));
-                    break;
-
-                case "Ichidan verb":
-                case "Ichidan verb - kureru special class":
-                    ll.addView(new PosTextView(getActivity(), "Ichidan", getResources().getDrawable(R.drawable.goichi_verb)));
-                    break;
-                case "noun or participle which takes the aux. verb suru":
-                case "su verb - precursor to the modern suru":
-                case "suru verb - special class":
-                case "suru verb - irregular":
-                    ll.addView(new PosTextView(getActivity(), "Suru V.", getResources().getDrawable(R.drawable.suru_verb)));
-                    break;
-            }
-        }
-    }
-
-    class vEntryListView extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    class vocabViewRecyclerView extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         class dictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
             public TextView tv_word, tv_read, tv_pos, tv_defs;
             public LinearLayout entry_layout, pos_resph;
+            public ImageView options;
 
             public dictViewHolder(View view) {
                 super(view);
@@ -233,6 +196,7 @@ public class vocabViewFragment extends Fragment {
                 tv_defs = view.findViewById(R.id.text_defs);
                 entry_layout = view.findViewById(R.id.item_layout);
                 pos_resph = view.findViewById(R.id.pos_resph);
+                options = view.findViewById(R.id.entry_more);
                 view.setOnClickListener(this);
                 view.setOnLongClickListener(this);
             }
@@ -241,7 +205,7 @@ public class vocabViewFragment extends Fragment {
             public void onClick(View view) {
                 if(mActionMode != null) {
                     view.setSelected(!view.isSelected());
-                    selected[getAdapterPosition()] = true;
+                    selected[getAdapterPosition()] = !selected[getAdapterPosition()];
                     return;
                 }
                 entryviewFragment evf = new entryviewFragment();
@@ -276,12 +240,15 @@ public class vocabViewFragment extends Fragment {
         class kdictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
             public TextView ktv, kdtv;
             public LinearLayout kanji_result;
+            public ImageButton koptions;
+
 
             public kdictViewHolder(View view) {
                 super(view);
                 ktv = view.findViewById(R.id.text_kanji);
                 kdtv = view.findViewById(R.id.text_kdefs);
                 kanji_result = view.findViewById(R.id.kanji_result);
+                koptions = view.findViewById(R.id.kentry_more);
                 view.setOnClickListener(this);
                 view.setOnLongClickListener(this);
             }
@@ -290,7 +257,7 @@ public class vocabViewFragment extends Fragment {
             public void onClick(View view) {
                 if(mActionMode != null) {
                     view.setSelected(!view.isSelected());
-                    selected[getAdapterPosition()] = true;
+                    selected[getAdapterPosition()] = !selected[getAdapterPosition()];
                     return;
                 }
                 kanjiviewFragment kvf = new kanjiviewFragment();
@@ -325,6 +292,42 @@ public class vocabViewFragment extends Fragment {
 
         }
 
+        public void addPos(LinearLayout ll, ArrayList<String> pos) {
+            for (String s : pos) {
+                String sw = s.replaceAll("\\[|\\]", "");
+                switch (sw) {
+                    case "noun (common) (futsuumeishi)":
+                        ll.addView(new PosTextView(getActivity(), "noun (common)", getResources().getDrawable(R.drawable.normal_common)));
+                        break;
+                    case "Godan verb - -aru special class":
+                    case "Godan verb with `bu\' ending":
+                    case "Godan verb with `gu\' ending":
+                    case "Godan verb with `ku\' ending":
+                    case "Godan verb - Iku/Yuku special class":
+                    case "Godan verb with `mu\' ending":
+                    case "Godan verb with `nu\' ending":
+                    case "Godan verb with `ru\' ending":
+                    case "Godan verb with `su\' ending":
+                    case "Godan verb with `tsu\' ending":
+                    case "Godan verb with `u\' ending":
+                    case "Godan verb with `u\' ending (special class)":
+                        ll.addView(new PosTextView(getActivity(), "Godan", getResources().getDrawable(R.drawable.goichi_verb)));
+                        break;
+
+                    case "Ichidan verb":
+                    case "Ichidan verb - kureru special class":
+                        ll.addView(new PosTextView(getActivity(), "Ichidan", getResources().getDrawable(R.drawable.goichi_verb)));
+                        break;
+                    case "noun or participle which takes the aux. verb suru":
+                    case "su verb - precursor to the modern suru":
+                    case "suru verb - special class":
+                    case "suru verb - irregular":
+                        ll.addView(new PosTextView(getActivity(), "Suru V.", getResources().getDrawable(R.drawable.suru_verb)));
+                        break;
+                }
+            }
+        }
+
 
         @NonNull
         @Override
@@ -332,10 +335,10 @@ public class vocabViewFragment extends Fragment {
             switch (viewType) {
                 case 1:
                     View rad = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_result, parent, false);
-                    return new vEntryListView.dictViewHolder(rad);
+                    return new vocabViewRecyclerView.dictViewHolder(rad);
                 case 0:
                     View radd = LayoutInflater.from(parent.getContext()).inflate(R.layout.kanji_result, parent, false);
-                    return new vEntryListView.kdictViewHolder(radd);
+                    return new vocabViewRecyclerView.kdictViewHolder(radd);
             }
             return null;
         }
@@ -344,7 +347,7 @@ public class vocabViewFragment extends Fragment {
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             switch (holder.getItemViewType()) {
                 case 1:
-                    vEntryListView.dictViewHolder dvh = (vEntryListView.dictViewHolder) holder;
+                    vocabViewRecyclerView.dictViewHolder dvh = (vocabViewRecyclerView.dictViewHolder) holder;
                     DEntry temp = (DEntry) list.get(position);
                     dvh.tv_word.setText(temp.kreading.get(0));
                     String read = "(" + temp.reading.get(0) + ")";
@@ -362,12 +365,14 @@ public class vocabViewFragment extends Fragment {
                     }
                     dvh.tv_defs.setText(s.toString().replaceAll("\\[|\\]", ""));
                     dvh.entry_layout.setSelected(selected[position]);
+                    dvh.options.setVisibility(View.GONE);
                     break;
                 case 0:
-                    vEntryListView.kdictViewHolder kdvh = (vEntryListView.kdictViewHolder) holder;
+                    vocabViewRecyclerView.kdictViewHolder kdvh = (vocabViewRecyclerView.kdictViewHolder) holder;
                     kdvh.ktv.setText(((KEntry) list.get(position)).getKanji());
                     kdvh.kdtv.setText(((KEntry) list.get(position)).getMeaning().toString().replaceAll("\\[|\\]", ""));
                     kdvh.kanji_result.setSelected(selected[position]);
+                    kdvh.koptions.setVisibility(View.GONE);
                     break;
             }
         }

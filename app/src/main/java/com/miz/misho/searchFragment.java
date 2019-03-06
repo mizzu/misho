@@ -3,7 +3,6 @@ package com.miz.misho;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
-import android.database.Cursor;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
@@ -14,6 +13,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,11 +21,13 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.Spinner;
@@ -39,26 +41,28 @@ import com.miz.misho.Objects.DEntry;
 import com.miz.misho.Objects.KEntry;
 import com.miz.misho.Objects.PosTextView;
 import com.miz.misho.Objects.Radical;
+import com.miz.misho.Objects.VocabList;
 import com.miz.misho.Utilties.DBUtil;
+import com.miz.misho.Utilties.FileUtil;
 import com.miz.misho.Utilties.RadUtil;
 import com.miz.misho.Utilties.WebUtil;
 
 import org.json.JSONException;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.Character.UnicodeBlock;
 
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.regex.Pattern;
 
 public class searchFragment extends android.support.v4.app.Fragment implements searchFragInterface {
 
     AssetManager am;
     WebUtil webUtil;
     DBUtil dbUtil;
+    FileUtil fileUtil;
     RadUtil ru;
     searchActivity mActivity;
 
@@ -108,6 +112,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
     RecyclerView.Adapter rMainAdapter;
     RecyclerView rMainView;
     RecyclerView.LayoutManager rMainManager;
+    searchRecyclerViewAdapter searchRecyclerViewAdapter;
 
     ActionBarDrawerToggle mDrawerToggle;
 
@@ -138,6 +143,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
 
 
         dbUtil = mActivity.getDbUtil();
+        fileUtil = mActivity.getFileUtil();
         am = mActivity.getAssets();
         webUtil = mActivity.getWebUtil();
         ru = new RadUtil();
@@ -153,59 +159,39 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         rRadView = view.findViewById(R.id.lv_rads);
         rMainView = view.findViewById(R.id.sv_result);
 
-        if (isDark) {
-            rKanView.setBackgroundColor(getResources().getColor(R.color.colorBGDT));
-            rRadView.setBackgroundColor(getResources().getColor(R.color.colorBGDT));
-        } else {
-            rRadView.setBackgroundColor(getResources().getColor(R.color.colorBG));
-            rKanView.setBackgroundColor(getResources().getColor(R.color.colorBG));
-
-        }
-
-        rRadManager = new GridLayoutManager(getActivity(), 9);
-        ((GridLayoutManager) rRadManager).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(int position) {
-                if (ru.getRadList().get(position).getStrokes() > 100)
-                    return 9;
-                else
-                    return 1;
-            }
-        });
-        rRadView.setLayoutManager(rRadManager);
-        rRadAdapter = new radListView();
-        rRadView.setAdapter(rRadAdapter);
-
-        rKanManager = new GridLayoutManager(getActivity(), 9);
-        rKanView.setLayoutManager(rKanManager);
-        rKanAdapter = new kanListView();
-        rKanView.setAdapter(rKanAdapter);
-
-
         rMainManager = new LinearLayoutManager(getActivity());
         rMainView.setLayoutManager(rMainManager);
 
+        if(savedInstanceState != null) {
+            kresult = (ArrayList<KEntry>) savedInstanceState.getSerializable("klist");
+            results = (ArrayList<DEntry>) savedInstanceState.getSerializable("list");
+        } else {
+            results = new ArrayList<>();
+            kresult = new ArrayList<>();
+        }
+
         rMainView.addItemDecoration(new DividerItemDecoration(rMainView.getContext(), DividerItemDecoration.VERTICAL));
-        rMainAdapter = new mainListView();
+        rMainAdapter = new searchRecyclerViewAdapter();
         rMainView.setAdapter(rMainAdapter);
 
-        searchInput.setTypeface(font);
+        ArrayAdapter<String> dda =
+                new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item,
+                        new String[]{"Contains", "Starts With", "Ends With", "Match Only"});
+        dds.setAdapter(dda);
+        dds.setSelection(3);
 
-        results = new ArrayList<>();
-        kresult = new ArrayList<>();
-        radList = new ArrayList<>();
-        romkanify = new Romkanify();
+        kjs = view.findViewById(R.id.kjSearch);
+        ArrayAdapter<String> kja =
+                new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item,
+                        new String[]{"Kanji", "Kunyomi", "Onyomi"});
+        kjs.setAdapter(kja);
+        kjs.setSelection(0);
 
-        mActivity.getSupportActionBar().setDisplayShowTitleEnabled(false);
-        mActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
-        romajiCheck = view.findViewById(R.id.romajiBox);
         tl = view.findViewById(R.id.tl_main);
 
         tl.addTab(tl.newTab().setText(R.string.tango));
         tl.addTab(tl.newTab().setText(R.string.kanji));
-        kanjiList = new ArrayList<>();
         tl.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -233,30 +219,69 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
 
             }
         });
-        tl.getTabAt(0).select();
-        kresult = new ArrayList<>();
-        results = new ArrayList<>();
-        PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences, false);
-        font = Typeface.createFromAsset(getActivity().getAssets(), "fonts/nsjpr.otf");
+        if (isDark) {
+            rKanView.setBackgroundColor(getResources().getColor(R.color.colorBGDT));
+            rRadView.setBackgroundColor(getResources().getColor(R.color.colorBGDT));
+        } else {
+            rRadView.setBackgroundColor(getResources().getColor(R.color.colorBG));
+            rKanView.setBackgroundColor(getResources().getColor(R.color.colorBG));
 
-        ArrayAdapter<String> dda =
-                new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item,
-                        new String[]{"Contains", "Starts With", "Ends With", "Match Only"});
-        dds.setAdapter(dda);
-        dds.setSelection(3);
-
-        radselected = new boolean[ru.getRadList().size()];
-        kjs = view.findViewById(R.id.kjSearch);
-        ArrayAdapter<String> kja =
-                new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item,
-                        new String[]{"Kanji", "Kunyomi", "Onyomi"});
-        kjs.setAdapter(kja);
-        kjs.setSelection(0);
-
+        }
 
         rKanView.setVisibility(View.GONE);
         rRadView.setVisibility(View.GONE);
         rad_divider.setVisibility(View.GONE);
+
+
+        rRadManager = new GridLayoutManager(getActivity(), 9);
+        ((GridLayoutManager) rRadManager).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (ru.getRadList().get(position).getStrokes() > 100)
+                    return 9;
+                else
+                    return 1;
+            }
+        });
+
+        romkanify = new Romkanify();
+        romajiCheck = view.findViewById(R.id.romajiBox);
+        if(savedInstanceState != null) {
+            kanjiList = (ArrayList<Radical>) savedInstanceState.getSerializable("kanlist");
+            radselected = (boolean []) savedInstanceState.getSerializable("rsel");
+            romajiCheck.setChecked(savedInstanceState.getBoolean("romaji"));
+            radButton.setChecked(savedInstanceState.getBoolean("rad"));
+            radList = (ArrayList<Radical>) savedInstanceState.getSerializable("radlist");
+            tl.getTabAt(savedInstanceState.getInt("tabpos")).select();
+            if(radButton.isChecked()) {
+             showRadKanji(view);
+            }
+        } else {
+            radselected = new boolean[ru.getRadList().size()];
+            kanjiList = new ArrayList<>();
+            radList = new ArrayList<>();
+            tl.getTabAt(0).select();
+        }
+
+        rRadView.setLayoutManager(rRadManager);
+        rRadAdapter = new radListView();
+        rRadView.setAdapter(rRadAdapter);
+
+        rKanManager = new GridLayoutManager(getActivity(), 9);
+        rKanView.setLayoutManager(rKanManager);
+        rKanAdapter = new kanListView();
+        rKanView.setAdapter(rKanAdapter);
+
+
+        searchInput.setTypeface(font);
+
+        mActivity.getSupportActionBar().setDisplayShowTitleEnabled(false);
+        mActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+        PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences, false);
+        font = Typeface.createFromAsset(getActivity().getAssets(), "fonts/nsjpr.otf");
+
         radButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -279,7 +304,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (mSP.getBoolean(Preferences.AUTO_SEARCH.toString(), false))
+                if (mSP.getBoolean(Preferences.AUTO_SEARCH.toString(), false) && !(mSP.getString("search_preference", "Offline JMDict").equalsIgnoreCase("Jisho")))
                     pickSearch(view);
             }
 
@@ -290,6 +315,19 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         return view;
     }
 
+    @Override
+    public final void onSaveInstanceState(final Bundle outState)
+    {
+        outState.putSerializable("klist", kresult);
+        outState.putSerializable("list", results);
+        outState.putSerializable("rsel", radselected);
+        outState.putBoolean("rad", radButton.isChecked());
+        outState.putBoolean("romaji", romajiCheck.isChecked());
+        outState.putSerializable("kanlist", kanjiList);
+        outState.putSerializable("radlist", radList);
+        outState.putInt("tabpos", tl.getSelectedTabPosition());
+        super.onSaveInstanceState(outState);
+    }
 
     public void createToast(String message) {
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
@@ -377,13 +415,13 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
             switch (v) {
                 case 1:
                     createToast("Malformed URL");
-                    break;
+                    return;
                 case 2:
                     createToast("URL IO Error");
-                    break;
+                    return;
                 case 3:
                     createToast("Error parsing JSON result");
-                    break;
+                    return;
             }
             rMainAdapter.notifyDataSetChanged();
         }
@@ -511,7 +549,6 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
                 createToast("Invalid Romaji");
                 return;
             }
-
             if (mSP.getBoolean("pop_ups_romaji", false) && romajiCheck.isChecked())
                 createToast("Searched for \"" + kanified + "\"");
             rMainAdapter.notifyDataSetChanged();
@@ -547,190 +584,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         }
     }
 
-    public void addPos(LinearLayout ll, ArrayList<String> pos) {
-        for (String s : pos) {
-            String sw = s.replaceAll("\\[|\\]", "");
-            switch (sw) {
-                case "noun (common) (futsuumeishi)":
-                    ll.addView(new PosTextView(getActivity(), "noun (common)", getResources().getDrawable(R.drawable.normal_common)));
-                    break;
-                case "Godan verb - -aru special class":
-                case "Godan verb with `bu\\' ending":
-                case "Godan verb with `gu\\' ending":
-                case "Godan verb with `ku\\' ending":
-                case "Godan verb - Iku/Yuku special class":
-                case "Godan verb with `mu\\' ending":
-                case "Godan verb with `nu\\' ending":
-                case "Godan verb with `ru\\' ending":
-                case "Godan verb with `su\\' ending":
-                case "Godan verb with `tsu\\' ending":
-                case "Godan verb with `u\\' ending":
-                case "Godan verb with `u\\' ending (special class)":
-                    ll.addView(new PosTextView(getActivity(), "Godan", getResources().getDrawable(R.drawable.goichi_verb)));
-                    break;
-
-                case "Ichidan verb":
-                case "Ichidan verb - kureru special class":
-                    ll.addView(new PosTextView(getActivity(), "Ichidan", getResources().getDrawable(R.drawable.goichi_verb)));
-                    break;
-                case "noun or participle which takes the aux. verb suru":
-                case "su verb - precursor to the modern suru":
-                case "suru verb - special class":
-                case "suru verb - irregular":
-                    ll.addView(new PosTextView(getActivity(), "Suru V.", getResources().getDrawable(R.drawable.suru_verb)));
-                    break;
-                    /*
-                    <!ENTITY adj-i "adjective (keiyoushi)">
-<!ENTITY adj-ix "adjective (keiyoushi) - yoi/ii class">
-<!ENTITY adj-na "adjectival nouns or quasi-adjectives (keiyodoshi)">
-<!ENTITY adj-no "nouns which may take the genitive case particle `no'">
-<!ENTITY adj-pn "pre-noun adjectival (rentaishi)">
-<!ENTITY adj-t "`taru' adjective">
-<!ENTITY adj-f "noun or verb acting prenominally">
-<!ENTITY adv "adverb (fukushi)">
-<!ENTITY adv-to "adverb taking the `to' particle">
-
-<!ENTITY n "noun (common) (futsuumeishi)">
-<!ENTITY n-adv "adverbial noun (fukushitekimeishi)">
-<!ENTITY n-suf "noun, used as a suffix">
-<!ENTITY n-pref "noun, used as a prefix">
-<!ENTITY n-t "noun (temporal) (jisoumeishi)">
-
-<!ENTITY hon "honorific or respectful (sonkeigo) language">
-<!ENTITY hum "humble (kenjougo) language">
-                     */
-            }
-        }
-    }
-
-    class mainListView extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
-        class dictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-            public TextView tv_word, tv_read, tv_pos, tv_defs;
-            public LinearLayout entry_layout, pos_resph;
-
-            public dictViewHolder(View view) {
-                super(view);
-                tv_word = view.findViewById(R.id.text_word);
-                tv_read = view.findViewById(R.id.text_reading);
-                //tv_pos = view.findViewById(R.id.text_pos);
-                tv_defs = view.findViewById(R.id.text_defs);
-                entry_layout = view.findViewById(R.id.item_layout);
-                pos_resph = view.findViewById(R.id.pos_resph);
-                view.setOnClickListener(this);
-            }
-
-            @Override
-            public void onClick(View view) {
-                entryviewFragment evf = new entryviewFragment();
-                Bundle tof = new Bundle();
-                tof.putSerializable("ENTRY", results.get(this.getAdapterPosition()));
-                tof.putSerializable("ISVOCAB", false);
-                evf.setArguments(tof);
-                searchFragment sf;
-                android.support.v4.app.FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-                ft.add(R.id.main_fragment, evf)
-                        .addToBackStack(null);
-                if ((sf = (searchFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.main_fragment)) != null) {
-                    ft.hide(sf);
-                }
-                ft.commit();
-
-            }
-        }
-
-        class kdictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-            public TextView ktv, kdtv;
-
-            public kdictViewHolder(View view) {
-                super(view);
-                ktv = view.findViewById(R.id.text_kanji);
-                kdtv = view.findViewById(R.id.text_kdefs);
-                view.setOnClickListener(this);
-            }
-
-            @Override
-            public void onClick(View view) {
-                kanjiviewFragment kvf = new kanjiviewFragment();
-                Bundle tof = new Bundle();
-                tof.putSerializable("KANJI", kresult.get(this.getAdapterPosition()));
-                tof.putSerializable("ISVOCAB", false);
-                kvf.setArguments(tof);
-                searchFragment sf;
-                android.support.v4.app.FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-                ft.add(R.id.main_fragment, kvf)
-                        .addToBackStack(null);
-                if ((sf = (searchFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.main_fragment)) != null) {
-                    ft.hide(sf);
-                }
-                ft.commit();
-                //startActivity(kanjiIntent);
-            }
-
-        }
-
-
-        @NonNull
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            switch (viewType) {
-                case 1:
-                    View rad = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_result, parent, false);
-                    return new dictViewHolder(rad);
-                case 0:
-                    View radd = LayoutInflater.from(parent.getContext()).inflate(R.layout.kanji_result, parent, false);
-                    return new kdictViewHolder(radd);
-            }
-            return null;
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            switch (holder.getItemViewType()) {
-                case 1:
-                    dictViewHolder dvh = (dictViewHolder) holder;
-                    DEntry temp = results.get(position);
-                    dvh.tv_word.setText(temp.kreading.get(0));
-                    String read = "(" + temp.reading.get(0) + ")";
-                    dvh.tv_read.setText(read);
-                    if (dvh.pos_resph.getChildCount() != 0) {
-                        dvh.pos_resph.removeAllViews();
-                    }
-                    addPos(dvh.pos_resph, temp.senses.get(0).getPos());
-                    StringBuilder s;
-                    s = new StringBuilder();
-                    for (int i = 0; i < temp.senses.get(0).getGloss().size(); i++) {
-                        if (i != 0)
-                            s.append("; ");
-                        s.append(temp.senses.get(0).getGloss(i));
-                    }
-                    dvh.tv_defs.setText(s.toString().replaceAll("\\[|\\]", ""));
-                    break;
-                case 0:
-                    kdictViewHolder kdvh = (kdictViewHolder) holder;
-                    kdvh.ktv.setText(kresult.get(position).getKanji());
-                    kdvh.kdtv.setText(kresult.get(position).getMeaning().toString().replaceAll("\\[|\\]", ""));
-                    break;
-            }
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            if (tl.getSelectedTabPosition() == 0)
-                return 1;
-            else
-                return 0;
-        }
-
-        @Override
-        public int getItemCount() {
-            if (tl.getSelectedTabPosition() == 0)
-                return results.size();
-            else
-                return kresult.size();
-        }
-    }
-/*
+    /*
     class mainListViewC extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         class dictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -1079,5 +933,256 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         s.insert(searchInput.getSelectionStart(), b.getText());
         searchInput.setText(s.toString());
         searchInput.setSelection(i + 1);
+    }
+
+    class addToEListASynchTask extends AsyncTask<Void, Void, Integer> {
+        VocabList vl;
+        Object entry;
+
+        public addToEListASynchTask(VocabList vl, Object entry){
+            this.vl = vl;
+            this.entry = entry;
+        }
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            try {
+                fileUtil.addToEList(new File(vl.getPath() + fileUtil.getEntryend()), entry);
+            } catch (Exception e) {
+                return 1;
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            switch(result) {
+                case 0:createToast("Added to " + vl.getName());
+                    return;
+                case 1:createToast("Error adding to list");
+            }
+        }
+    }
+
+    public boolean doOptions(View view, final int position){
+                final ArrayList<VocabList> qvl = mActivity.getQuickAdd();
+                if(qvl.isEmpty())
+                    return false;
+                PopupMenu pm = new PopupMenu(getContext(), view);
+                int i = 0;
+                for(VocabList vl : qvl) {
+                    pm.getMenu().add(0, i, 0, vl.getName());
+                    i++;
+                }
+                pm.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        addToEListASynchTask addToEListASynchTask = new addToEListASynchTask(qvl.get(menuItem.getItemId()), results.get(position));
+                        addToEListASynchTask.execute();
+                        return true;
+                    }
+                });
+                pm.show();
+                return false;
+            }
+
+    public class searchRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+        class dictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+            public TextView tv_word, tv_read, tv_pos, tv_defs;
+            public LinearLayout entry_layout, pos_resph;
+            ImageButton options;
+
+            public dictViewHolder(View view) {
+                super(view);
+                tv_word = view.findViewById(R.id.text_word);
+                tv_read = view.findViewById(R.id.text_reading);
+                //tv_pos = view.findViewById(R.id.text_pos);
+                tv_defs = view.findViewById(R.id.text_defs);
+                entry_layout = view.findViewById(R.id.item_layout);
+                pos_resph = view.findViewById(R.id.pos_resph);
+                options = view.findViewById(R.id.entry_more);
+                options.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        doOptions(view, getAdapterPosition());
+                    }
+                });
+                view.setOnClickListener(this);
+            }
+
+            @Override
+            public void onClick(View view) {
+                entryviewFragment evf = new entryviewFragment();
+                Bundle tof = new Bundle();
+                tof.putSerializable("ENTRY", results.get(this.getAdapterPosition()));
+                tof.putSerializable("ISVOCAB", false);
+                evf.setArguments(tof);
+                searchFragment sf;
+                android.support.v4.app.FragmentTransaction ft = mActivity.getSupportFragmentManager().beginTransaction();
+                ft.add(R.id.main_fragment, evf)
+                        .addToBackStack(null);
+                if ((sf = (searchFragment) mActivity.getSupportFragmentManager().findFragmentById(R.id.main_fragment)) != null) {
+                    ft.hide(sf);
+                }
+                ft.commit();
+
+            }
+        }
+
+        class kdictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+            public TextView ktv, kdtv;
+            public ImageButton koptions;
+
+            public kdictViewHolder(View view) {
+                super(view);
+                ktv = view.findViewById(R.id.text_kanji);
+                kdtv = view.findViewById(R.id.text_kdefs);
+                koptions = view.findViewById(R.id.kentry_more);
+                koptions.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        doOptions(view, getAdapterPosition());
+                    }
+                });
+                view.setOnClickListener(this);
+            }
+
+            @Override
+            public void onClick(View view) {
+                kanjiviewFragment kvf = new kanjiviewFragment();
+                Bundle tof = new Bundle();
+                tof.putSerializable("KANJI", kresult.get(this.getAdapterPosition()));
+                tof.putSerializable("ISVOCAB", false);
+                kvf.setArguments(tof);
+                searchFragment sf;
+                android.support.v4.app.FragmentTransaction ft = mActivity.getSupportFragmentManager().beginTransaction();
+                ft.add(R.id.main_fragment, kvf)
+                        .addToBackStack(null);
+                if ((sf = (searchFragment) mActivity.getSupportFragmentManager().findFragmentById(R.id.main_fragment)) != null) {
+                    ft.hide(sf);
+                }
+                ft.commit();
+                //startActivity(kanjiIntent);
+            }
+
+        }
+
+
+        @NonNull
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            switch (viewType) {
+                case 1:
+                    View rad = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_result, parent, false);
+                    return new dictViewHolder(rad);
+                case 0:
+                    View radd = LayoutInflater.from(parent.getContext()).inflate(R.layout.kanji_result, parent, false);
+                    return new kdictViewHolder(radd);
+            }
+            return null;
+        }
+
+        public void addPos(LinearLayout ll, ArrayList<String> pos) {
+            for (String s : pos) {
+                String sw = s.replaceAll("\\[|\\]", "");
+                switch (sw) {
+                    case "noun (common) (futsuumeishi)":
+                        ll.addView(new PosTextView(mActivity, "noun (common)", mActivity.getResources().getDrawable(R.drawable.normal_common)));
+                        break;
+                    case "Godan verb - -aru special class":
+                    case "Godan verb with `bu\' ending":
+                    case "Godan verb with `gu\' ending":
+                    case "Godan verb with `ku\' ending":
+                    case "Godan verb - Iku/Yuku special class":
+                    case "Godan verb with `mu\' ending":
+                    case "Godan verb with `nu\' ending":
+                    case "Godan verb with `ru\' ending":
+                    case "Godan verb with `su\' ending":
+                    case "Godan verb with `tsu\' ending":
+                    case "Godan verb with `u\' ending":
+                    case "Godan verb with `u\' ending (special class)":
+                        ll.addView(new PosTextView(mActivity, "Godan", mActivity.getResources().getDrawable(R.drawable.goichi_verb)));
+                        break;
+
+                    case "Ichidan verb":
+                    case "Ichidan verb - kureru special class":
+                        ll.addView(new PosTextView(mActivity, "Ichidan", mActivity.getResources().getDrawable(R.drawable.goichi_verb)));
+                        break;
+                    case "noun or participle which takes the aux. verb suru":
+                    case "su verb - precursor to the modern suru":
+                    case "suru verb - special class":
+                    case "suru verb - irregular":
+                        ll.addView(new PosTextView(mActivity, "Suru V.", mActivity.getResources().getDrawable(R.drawable.suru_verb)));
+                        break;
+                        /*
+                        <!ENTITY adj-i "adjective (keiyoushi)">
+    <!ENTITY adj-ix "adjective (keiyoushi) - yoi/ii class">
+    <!ENTITY adj-na "adjectival nouns or quasi-adjectives (keiyodoshi)">
+    <!ENTITY adj-no "nouns which may take the genitive case particle `no'">
+    <!ENTITY adj-pn "pre-noun adjectival (rentaishi)">
+    <!ENTITY adj-t "`taru' adjective">
+    <!ENTITY adj-f "noun or verb acting prenominally">
+    <!ENTITY adv "adverb (fukushi)">
+    <!ENTITY adv-to "adverb taking the `to' particle">
+
+    <!ENTITY n "noun (common) (futsuumeishi)">
+    <!ENTITY n-adv "adverbial noun (fukushitekimeishi)">
+    <!ENTITY n-suf "noun, used as a suffix">
+    <!ENTITY n-pref "noun, used as a prefix">
+    <!ENTITY n-t "noun (temporal) (jisoumeishi)">
+
+    <!ENTITY hon "honorific or respectful (sonkeigo) language">
+    <!ENTITY hum "humble (kenjougo) language">
+                         */
+                }
+            }
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            switch (holder.getItemViewType()) {
+                case 1:
+                    dictViewHolder dvh = (dictViewHolder) holder;
+                    DEntry temp = results.get(position);
+                    dvh.tv_word.setText(temp.kreading.get(0));
+                    String read = "(" + temp.reading.get(0) + ")";
+                    dvh.tv_read.setText(read);
+                    if (dvh.pos_resph.getChildCount() != 0) {
+                        dvh.pos_resph.removeAllViews();
+                    }
+                    addPos(dvh.pos_resph, temp.senses.get(0).getPos());
+                    StringBuilder s;
+                    s = new StringBuilder();
+                    for (int i = 0; i < temp.senses.get(0).getGloss().size(); i++) {
+                        if (i != 0)
+                            s.append("; ");
+                        s.append(temp.senses.get(0).getGloss(i));
+                    }
+                    dvh.tv_defs.setText(s.toString().replaceAll("\\[|\\]", ""));
+                    break;
+                case 0:
+                    kdictViewHolder kdvh = (kdictViewHolder) holder;
+                    kdvh.ktv.setText(kresult.get(position).getKanji());
+                    kdvh.kdtv.setText(kresult.get(position).getMeaning().toString().replaceAll("\\[|\\]", ""));
+                    break;
+            }
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (tl.getSelectedTabPosition() == 0)
+                return 1;
+            else
+                return 0;
+        }
+
+        @Override
+        public int getItemCount() {
+            if (tl.getSelectedTabPosition() == 0)
+                return results.size();
+            else
+                return kresult.size();
+        }
     }
 }

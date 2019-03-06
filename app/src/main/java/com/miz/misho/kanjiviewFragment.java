@@ -1,6 +1,7 @@
 package com.miz.misho;
 
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -9,16 +10,24 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.miz.misho.Objects.KEntry;
+import com.miz.misho.Objects.VocabList;
+import com.miz.misho.Utilties.FileUtil;
 
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
+import java.util.ArrayList;
 
 public class kanjiviewFragment extends android.support.v4.app.Fragment {
     KEntry entry;
     boolean isDark;
     SharedPreferences mSP;
+    FileUtil fileUtil;
     searchActivity mActivity;
 
     boolean isVocab;
@@ -37,8 +46,10 @@ public class kanjiviewFragment extends android.support.v4.app.Fragment {
         View view = inflater.inflate(R.layout.kanji_view, container, false);
         mView = view;
         mActivity = null;
-        if(getActivity() instanceof  searchActivity)
+        if(getActivity() instanceof  searchActivity) {
             mActivity = ((searchActivity) getActivity());
+            fileUtil = mActivity.getFileUtil();
+        }
         TextView kanji_display = view.findViewById(R.id.kanji_display);
 
         TextView jlpt_title = view.findViewById(R.id.jlpt_title);
@@ -172,6 +183,10 @@ public class kanjiviewFragment extends android.support.v4.app.Fragment {
     return view;
     }
 
+    public void createToast(String message) {
+        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if (!isVocab)
@@ -179,6 +194,33 @@ public class kanjiviewFragment extends android.support.v4.app.Fragment {
         //else
         //    inflater.inflate(R.menu.vocab_entry_view_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    class addToEListASynchTask extends AsyncTask<Void, Void, Integer> {
+        VocabList vl;
+
+        public addToEListASynchTask(VocabList vl){
+            this.vl = vl;
+        }
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            try {
+                fileUtil.addToEList(new File(vl.getPath() + fileUtil.getEntryend()), entry);
+            } catch (Exception e) {
+                return 1;
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            switch(result) {
+                case 0:createToast("Added to " + vl.getName());
+                    return;
+                case 1:createToast("Error adding to list");
+            }
+        }
     }
 
 
@@ -200,6 +242,26 @@ public class kanjiviewFragment extends android.support.v4.app.Fragment {
                         ft.hide(sf);
                     }
                     ft.commit();
+                    break;
+                case R.id.entry_quickadd:
+                    final ArrayList<VocabList> qvl = mActivity.getQuickAdd();
+                    if(qvl.isEmpty())
+                        return false;
+                    PopupMenu pm = new PopupMenu(getContext(), mActivity.findViewById(R.id.entry_quickadd));
+                    int i = 0;
+                    for(VocabList vl : qvl) {
+                        pm.getMenu().add(0, i, 0, vl.getName());
+                        i++;
+                    }
+                    pm.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem menuItem) {
+                            addToEListASynchTask addToEListASynchTask = new addToEListASynchTask(qvl.get(menuItem.getItemId()));
+                            addToEListASynchTask.execute();
+                            return true;
+                        }
+                    });
+                    pm.show();
                     break;
                 case android.R.id.home:
                     mActivity.onBackPressed();

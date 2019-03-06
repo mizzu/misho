@@ -19,6 +19,7 @@
 
 
         <activity
+            android:screenOrientation="portrait"
             android:name="com.miz.misho.searchActivity"
             android:exported="true"
             android:fitsSystemWindows="true"
@@ -37,8 +38,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.miz.misho.preferencesActivity"/>
-        <activity android:name="com.miz.misho.studyActivity"/>
+        <activity android:name="com.miz.misho.preferencesActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name="com.miz.misho.studyActivity"
+            android:screenOrientation="portrait"/>
 
         </application>
 

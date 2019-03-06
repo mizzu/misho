@@ -81,31 +81,48 @@ public class studyActivity extends AppCompatActivity {
         list_remaining = findViewById(R.id.items_left);
         score_pos_item = findViewById(R.id.score_pos);
         score_neg_item = findViewById(R.id.score_neg);
-        score_pos = 0;
-        score_neg = 0;
 
-        vocabList = (ArrayList<Object>) getIntent().getSerializableExtra("LIST");
-        Collections.shuffle(vocabList);
+        if (saveInstanceState == null) {
+            score_pos = 0;
+            score_neg = 0;
 
+            vocabList = (ArrayList<Object>) getIntent().getSerializableExtra("LIST");
+            Collections.shuffle(vocabList);
+
+
+            mFragment = new cardfrontFragment();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            Bundle b = new Bundle();
+            if(vocabList.get(0) instanceof DEntry) {
+                b.putSerializable("ENTRY", (DEntry) vocabList.get(0));
+                isEntry = true;
+            } else {
+                b.putSerializable("KENTRY", (KEntry) vocabList.get(0));
+                isEntry = false;
+            }
+            mFragment.setArguments(b);
+            ft.add(R.id.study_fragment, mFragment, "top");
+            ft.commit();
+        } else {
+            mFragment = getSupportFragmentManager().getFragment(saveInstanceState, "DEF");
+            score_pos = saveInstanceState.getInt("score_pos");
+            score_neg = saveInstanceState.getInt("score_neg");
+            vocabList = (ArrayList<Object>)saveInstanceState.getSerializable("list");
+        }
 
         list_remaining.setText(Integer.toString(vocabList.size()));
         score_pos_item.setText(Integer.toString(score_pos));
         score_neg_item.setText(Integer.toString(score_neg));
 
-        mFragment = new cardfrontFragment();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Bundle b = new Bundle();
-        if(vocabList.get(0) instanceof DEntry) {
-            b.putSerializable("ENTRY", (DEntry) vocabList.get(0));
-            isEntry = true;
-        } else {
-            b.putSerializable("KENTRY", (KEntry) vocabList.get(0));
-            isEntry = false;
-        }
-        mFragment.setArguments(b);
-        ft.add(R.id.study_fragment, mFragment, "top");
-        ft.commit();
+    }
 
+    @Override
+    protected final void onSaveInstanceState(final Bundle outState)
+    {
+        outState.putInt("score_pos", score_pos);
+        outState.putInt("score_neg", score_neg);
+        outState.putSerializable("list", vocabList);
+        super.onSaveInstanceState(outState);
     }
 
     public void finishActivity() {

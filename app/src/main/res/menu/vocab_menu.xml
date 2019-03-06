@@ -8,9 +8,12 @@
         android:icon="@android:drawable/ic_input_add"
         app:showAsAction="always" />
 
+
     <item
-        android:id="@+id/vocab_delete"
+        android:id="@+id/vocab_batch"
         android:actionLayout="@layout/toolbar"
-        android:icon="@android:drawable/ic_delete"
+        android:icon="@android:drawable/btn_dropdown"
         app:showAsAction="always" />
+
+
 </menu>

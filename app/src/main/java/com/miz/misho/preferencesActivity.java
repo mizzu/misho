@@ -17,6 +17,7 @@ public class preferencesActivity extends PreferenceActivity {
     ListPreference search_type_pref;
     CheckBoxPreference pop_up_romaji;
     CheckBoxPreference cb_usedt;
+    CheckBoxPreference auto_search;
     EditTextPreference max_results;
 
     boolean isDark;
@@ -32,6 +33,7 @@ public class preferencesActivity extends PreferenceActivity {
         super.onCreate(saveInstanceState);
         addPreferencesFromResource(R.xml.preferences);
         mSP = PreferenceManager.getDefaultSharedPreferences(this);
+        auto_search = (CheckBoxPreference) findPreference(Preferences.AUTO_SEARCH.toString());
         String search_type = mSP.getString(Preferences.SEARCH_TYPE.toString(), "Offline JMDict");
         search_type_pref = (ListPreference) findPreference(Preferences.SEARCH_TYPE.toString());
         max_results = (EditTextPreference) findPreference(Preferences.MAX_RESULTS.toString());
@@ -43,6 +45,20 @@ public class preferencesActivity extends PreferenceActivity {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 search_type_pref.setSummary(newValue.toString());
+                if(((String) newValue ).equalsIgnoreCase("Jisho")) {
+                    auto_search.setChecked(false);
+                }
+                return true;
+            }
+        });
+
+        auto_search.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object o) {
+                if(mSP.getString(Preferences.SEARCH_TYPE.toString(), "Offline JMDict").equalsIgnoreCase("Jisho")) {
+                        auto_search.setChecked(false);
+                    return false;
+                }
                 return true;
             }
         });

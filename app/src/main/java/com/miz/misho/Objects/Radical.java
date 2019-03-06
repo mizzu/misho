@@ -1,6 +1,8 @@
 package com.miz.misho.Objects;
 
-public class Radical{
+import java.io.Serializable;
+
+public class Radical implements Serializable {
     private String radical;
     private int strokes;
 

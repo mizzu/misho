@@ -27,8 +27,11 @@ private final String entryend = ".deml";
 private final String forbiddenChars = "|\\?*<\":>+[]/'.";
 private final Pattern forbiddenCharsPattern = Pattern.compile("[\\\\|?*<\":>+\\[\\]/'.]+");
 
+    public String getEntryend() {
+        return entryend;
+    }
 
-public FileUtil(Context context){
+    public FileUtil(Context context){
     mContext = context;
    rootdir = Environment.getExternalStorageDirectory().getAbsolutePath() +File.separator+"MishoLists";
 }
@@ -133,6 +136,15 @@ public FileUtil(Context context){
     }
 }
 
+public void batchMove(ArrayList<String> paths, String destination) throws IOException{
+    for(String s : paths) {
+        File f = new File(s+entryend);
+        if(f.exists() && !f.isDirectory()) {
+            FileUtils.moveFile(f, new File(destination + s.substring(s.lastIndexOf(File.separator, s.length()-1))+entryend));
+        }
+    }
+}
+
     public void batchAdd(ArrayList<String> paths, Object entry) throws IOException, ClassNotFoundException {
         for(String s : paths) {
             File f = new File(s+entryend);
@@ -147,9 +159,9 @@ public FileUtil(Context context){
     ArrayList<VocabList> vl = new ArrayList<>();
         for(File f : root.listFiles()) {
             if(f.getName().endsWith(entryend)) {
-             vl.add(new VocabList(f.getName().substring(0, f.getName().length()-5), 0));
+             vl.add(new VocabList(f.getName().substring(0, f.getName().length()-entryend.length()), f.getPath().substring(0, f.getPath().length()-entryend.length()), 0));
             } else if(f.isDirectory()) {
-                vl.add(new VocabList(f.getName(), -1));
+                vl.add(new VocabList(f.getName(), f.getPath().substring(0, f.getPath().length()-entryend.length()), -1));
             }
         }
         if(!dir.equals(rootdir))
