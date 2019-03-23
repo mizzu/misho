@@ -23,9 +23,17 @@ import java.util.regex.Pattern;
 public class FileUtil {
 Context mContext;
 private String rootdir;
+//File ending to distinguish it from other files
 private final String entryend = ".deml";
+
+//Forbidden characters in the android system
 private final String forbiddenChars = "|\\?*<\":>+[]/'.";
+
+//Regular expression that searched for the above characters
 private final Pattern forbiddenCharsPattern = Pattern.compile("[\\\\|?*<\":>+\\[\\]/'.]+");
+
+//name of root directory in public storage
+private final String rootdirname = "MishoLists";
 
     public String getEntryend() {
         return entryend;
@@ -33,7 +41,7 @@ private final Pattern forbiddenCharsPattern = Pattern.compile("[\\\\|?*<\":>+\\[
 
     public FileUtil(Context context){
     mContext = context;
-   rootdir = Environment.getExternalStorageDirectory().getAbsolutePath() +File.separator+"MishoLists";
+   rootdir = Environment.getExternalStorageDirectory().getAbsolutePath() +File.separator+rootdirname;
 }
 
 
@@ -58,6 +66,13 @@ private final Pattern forbiddenCharsPattern = Pattern.compile("[\\\\|?*<\":>+\\[
     }
 
 
+
+    /**
+     * Adds a new file with given name in the given directory.
+     * @param name name of list
+     * @param dir directory of list
+     * @throws IOException
+     */
     public void addEList(String name, String dir) throws IOException {
         createRootIfNotExists();
         File toAdd = new File(dir+File.separator+name+entryend);
@@ -70,6 +85,13 @@ private final Pattern forbiddenCharsPattern = Pattern.compile("[\\\\|?*<\":>+\\[
         toFileOOS.close();
     }
 
+    /**
+     * Overwrites an entry list. (Used when changed are made after deleting)
+     * @param name name of list
+     * @param list new list of entries
+     * @param dir directory of list
+     * @throws IOException
+     */
     public void overwriteEList(String name, ArrayList<Object> list, String dir) throws IOException {
         createRootIfNotExists();
         File toAdd = new File(dir+File.separator+name+entryend);
@@ -80,6 +102,13 @@ private final Pattern forbiddenCharsPattern = Pattern.compile("[\\\\|?*<\":>+\\[
         toFileOOS.close();
     }
 
+    /**
+     * Creates a directory with the given name in the given directory
+     * @param name
+     * @param dir
+     * @return true/false if it has been successfully created
+     * @throws FileExistsException
+     */
     public boolean mkDir(String name, String dir) throws FileExistsException {
     File toDir = new File(dir+File.separator+name);
     if(toDir.exists() && toDir.isDirectory())
@@ -87,6 +116,7 @@ private final Pattern forbiddenCharsPattern = Pattern.compile("[\\\\|?*<\":>+\\[
     return toDir.mkdir();
     }
 
+    //batch delete is used in favor of deleteEList
     public boolean deleteEList(String name, String dir) throws FileNotFoundException {
     File toDelete = new File(dir+File.separator+name+entryend);
     if(!toDelete.exists())
@@ -94,6 +124,14 @@ private final Pattern forbiddenCharsPattern = Pattern.compile("[\\\\|?*<\":>+\\[
     return toDelete.delete();
     }
 
+    /**
+     * Adds an entry (DEntry or KEntry object e) to a list (File f)
+     * @param f File to add it to
+     * @param e DEntry or KEntry object
+     * @return true or false if it has completed the operation successfully
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public boolean addToEList(File f, Object e) throws IOException, ClassNotFoundException {
     ObjectInputStream toAppendOIS = new ObjectInputStream(new FileInputStream(f));
     ArrayList<Object> curr = (ArrayList<Object>) toAppendOIS.readObject();
@@ -119,6 +157,11 @@ private final Pattern forbiddenCharsPattern = Pattern.compile("[\\\\|?*<\":>+\\[
         return true;
     }
 
+    /**
+     * Using the given paths, attempts to delete each file
+     * @param paths ArrayList of paths of files to be deleted.
+     * @throws IOException
+     */
     public void batchDelete(ArrayList<String> paths) throws IOException {
     for(String s : paths) {
         File f = new File(s);
@@ -136,7 +179,13 @@ private final Pattern forbiddenCharsPattern = Pattern.compile("[\\\\|?*<\":>+\\[
     }
 }
 
-public void batchMove(ArrayList<String> paths, String destination) throws IOException{
+    /**
+     * Batch moves the files at the given 'paths' to the 'destination' directory.
+     * @param paths paths of files to be moved
+     * @param destination destination directory
+     * @throws IOException
+     */
+    public void batchMove(ArrayList<String> paths, String destination) throws IOException{
     for(String s : paths) {
         File f = new File(s+entryend);
         if(f.exists() && !f.isDirectory()) {
@@ -145,6 +194,13 @@ public void batchMove(ArrayList<String> paths, String destination) throws IOExce
     }
 }
 
+    /**
+     * Batch adds entry to files at the given paths.
+     * @param paths paths of lists to add the entry to
+     * @param entry DEntry or KEntry object
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public void batchAdd(ArrayList<String> paths, Object entry) throws IOException, ClassNotFoundException {
         for(String s : paths) {
             File f = new File(s+entryend);
@@ -154,6 +210,11 @@ public void batchMove(ArrayList<String> paths, String destination) throws IOExce
         }
     }
 
+    /**
+     * Gets the names of the files ending with the 'end of filename' ending.
+     * @param dir directory to search in
+     * @return list of files in the directory
+     */
     public ArrayList<VocabList> scanFiles(String dir) {
     File root = new File(dir);
     ArrayList<VocabList> vl = new ArrayList<>();
@@ -180,6 +241,14 @@ public void batchMove(ArrayList<String> paths, String destination) throws IOExce
         return vl.toArray(new String[]{});
     }
 
+    /**
+     * Gets the entries from the filename 'name' and directory 'dir'
+     * @param name Name of file
+     * @param dir Directory of file
+     * @return ArrayList of the entries in the file.
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public ArrayList<DEntry> getEntries(String name, String dir) throws IOException,ClassNotFoundException {
         File toGet = new File(dir+File.separator+name+entryend);
         ObjectInputStream toGetOIS = new ObjectInputStream(new FileInputStream(toGet));

@@ -2,6 +2,11 @@ package com.miz.misho.Objects;
 
 import java.util.ArrayList;
 
+/**
+ * Deprecated.
+ */
+
+@Deprecated
 public class RadBlocks {
     private int strokes;
     private ArrayList<Radical> radlist;

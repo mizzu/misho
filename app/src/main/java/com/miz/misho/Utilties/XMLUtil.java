@@ -27,6 +27,9 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+/**
+ * Used to mainly edit a application used settings xml.
+ */
 public class XMLUtil {
     private String XML_PATH;
     private final String XML_DEF_NAME = "DefaultSettingsXML.xml";
@@ -41,6 +44,10 @@ public class XMLUtil {
         createSettingsIfNotExists();
     }
 
+    /**
+     * Create the file if it doesn't exist from the default one shipped with the app.
+     * @throws IOException
+     */
     public void createSettingsIfNotExists() throws IOException {
         File f = new File(XML_PATH + File.separator + XML_NAME);
         if(!f.exists()) {
@@ -61,6 +68,15 @@ public class XMLUtil {
         }
     }
 
+    /**
+     * Gets the QuickList files.
+     * @return ArrayList of QuickList files.
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws TransformerException
+     */
     public ArrayList<VocabList> getQuickAddList() throws FileNotFoundException, IOException, ParserConfigurationException, SAXException, TransformerException{
         File f = new File(XML_PATH + File.separator + XML_NAME);
         if(!f.exists())
@@ -105,6 +121,19 @@ public class XMLUtil {
         return  vl;
         }
 
+    /**
+     * If any changes are done to any list that is currently a QuickList, this would update it.
+     * Also used to add a QuickList.
+     * @param oldname Old name of list ("" if new)
+     * @param oldpath Old path of list ("" if new)
+     * @param newname New name (Or name that will be added)
+     * @param newpath New path (Or path that will be added)
+     * @return true or false if completed successfully
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     * @throws TransformerException
+     */
     public boolean updateQuickAddNamePath(String  oldname, String oldpath, String newname, String newpath) throws ParserConfigurationException,  SAXException, IOException, TransformerException {
         File f = new File(XML_PATH + File.separator + XML_NAME);
         if(!f.exists())

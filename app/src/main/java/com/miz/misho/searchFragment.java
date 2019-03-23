@@ -13,7 +13,6 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -57,6 +56,9 @@ import java.lang.Character.UnicodeBlock;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
+/**
+ * Fragment that handles the main searching function.
+ */
 public class searchFragment extends android.support.v4.app.Fragment implements searchFragInterface {
 
     AssetManager am;
@@ -246,6 +248,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
 
         romkanify = new Romkanify();
         romajiCheck = view.findViewById(R.id.romajiBox);
+
         if(savedInstanceState != null) {
             kanjiList = (ArrayList<Radical>) savedInstanceState.getSerializable("kanlist");
             radselected = (boolean []) savedInstanceState.getSerializable("rsel");
@@ -315,6 +318,10 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         return view;
     }
 
+    /**
+     * Saves data when recreate is called
+     * @param outState
+     */
     @Override
     public final void onSaveInstanceState(final Bundle outState)
     {
@@ -333,6 +340,9 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * ASyncTask to search in the normal entry table.
+     */
     public class ASynchSearchDB extends AsyncTask<Void, Void, Integer> {
         private String kanified;
 
@@ -386,6 +396,9 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
             tl.getTabAt(0).select();
     }
 
+    /**
+     * ASyncTask used for Jisho.org.
+     */
     public class ASynchSearchWeb extends AsyncTask<Void, Void, Integer> {
         @Override
         protected Integer doInBackground(Void... v) {
@@ -427,11 +440,19 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         }
     }
 
+    /**
+     * Checks for an internet connection.
+     * @return
+     */
     public boolean isConnected() {
         ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         return cm.getActiveNetworkInfo() != null;
     }
 
+    /**
+     * Search for the web.
+     * @param view
+     */
     public void webSearch(View view) {
         if (asws != null) {
             if (asws.getStatus() == AsyncTask.Status.RUNNING || asws.getStatus() == AsyncTask.Status.PENDING)
@@ -451,6 +472,15 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         asws.execute();
     }
 
+    /**
+     * A method that attempts to read what kind of search is required.
+     * If text contains kanji/hiragana text, returns 1.
+     * If text contains hiragana/katakana text, returns 2.
+     * If text contains only romaji, returns 3.
+     * If text contains Kanji and romaji or Hiragana/Katakana plus romaji, returns -1 (doesn't search)
+     * @param text text to be searched
+     * @return type of search required
+     */
     public int getSearch(char[] text) {
         if (romajiCheck.isChecked())
             return 2;
@@ -476,6 +506,10 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         else return -1;
     }
 
+    /**
+     * Method that shows/hides the radical/kanji search views.
+     * @param view
+     */
     public void showRadKanji(View view) {
         if (rRadView.getVisibility() == View.GONE && rKanView.getVisibility() == View.GONE) {
             rRadView.setVisibility(View.VISIBLE);
@@ -490,6 +524,10 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
     }
 
 
+    /**
+     * Method to search in the database.
+     * @param view
+     */
     public void dbSearch(View view) {
         if (asdb != null) {
             if (asdb.getStatus() == AsyncTask.Status.RUNNING || asdb.getStatus() == AsyncTask.Status.PENDING)
@@ -499,6 +537,9 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         asdb.execute();
     }
 
+    /**
+     * ASyncTask to search in the kanji table.
+     */
     public class ASynchSearchKDB extends AsyncTask<Void, Void, Integer> {
         private String kanified;
 
@@ -555,6 +596,10 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         }
     }
 
+    /**
+     * Method to search in the Kanji table
+     * @param view
+     */
     public void kdbSearch(View view) {
         if (askb != null) {
             if (askb.getStatus() == AsyncTask.Status.RUNNING || askb.getStatus() == AsyncTask.Status.PENDING)
@@ -569,6 +614,10 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
     }
 
 
+    /**
+     * Gets the search depending if using Jisho or Offline JMDict
+     * @param view
+     */
     public void pickSearch(View view) {
         if (tl.getSelectedTabPosition() == 0) {
             if (mSP.getString("search_preference", "Offline JMDict").equalsIgnoreCase("Jisho")) {
@@ -723,6 +772,10 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         }
     }
 */
+
+    /**
+     * Recycler view for the radical list.
+     */
     class radListView extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         class radViewHolder extends RecyclerView.ViewHolder {
@@ -794,6 +847,9 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
 
     }
 
+    /**
+     * Recycler view for the kanji list above the radical list.
+     */
     class kanListView extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         class kanViewHolder extends RecyclerView.ViewHolder {
@@ -861,7 +917,9 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
 
     }
 
-
+    /**
+     * Searched the kanji table using the radicals selected
+     */
     public class ASynchRadSearch extends AsyncTask<Void, Void, Integer> {
         @Override
         protected Integer doInBackground(Void... v) {
@@ -896,6 +954,11 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
     }
 
 
+    /**
+     * Method called when searching for a radical. (Called when a radical button is
+     * selected/deselected)
+     * @param view
+     */
     public void doRadSearch(View view) {
         Radical r = (Radical) view.getTag();
         radselected[ru.getRadList().indexOf(r)] = !radselected[ru.getRadList().indexOf(r)];
@@ -925,6 +988,10 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         }
     }
 
+    /**
+     * When a kanji is tapped in the radical search menu, enters it where the cursor is.
+     * @param view
+     */
     public void toInput(View view) {
         Button b = (Button) view;
         StringBuilder s = new StringBuilder();
@@ -935,6 +1002,9 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         searchInput.setSelection(i + 1);
     }
 
+    /**
+     * ASyncTask used to add an entry to a list using QuickList function.
+     */
     class addToEListASynchTask extends AsyncTask<Void, Void, Integer> {
         VocabList vl;
         Object entry;
@@ -964,10 +1034,18 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
         }
     }
 
+    /**
+     * Called when the shishkebab icon is pressed on the entry result.
+     * @param view
+     * @param position
+     * @return
+     */
     public boolean doOptions(View view, final int position){
                 final ArrayList<VocabList> qvl = mActivity.getQuickAdd();
-                if(qvl.isEmpty())
+                if(qvl.isEmpty()) {
+                    createToast("No QuickAdd lists available");
                     return false;
+                }
                 PopupMenu pm = new PopupMenu(getContext(), view);
                 int i = 0;
                 for(VocabList vl : qvl) {
@@ -977,8 +1055,14 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
                 pm.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
-                        addToEListASynchTask addToEListASynchTask = new addToEListASynchTask(qvl.get(menuItem.getItemId()), results.get(position));
-                        addToEListASynchTask.execute();
+                        addToEListASynchTask addToEListASynchTask = null;
+                        if(tl.getSelectedTabPosition() == 0) {
+                            addToEListASynchTask = new addToEListASynchTask(qvl.get(menuItem.getItemId()), results.get(position));
+                        } else if (tl.getSelectedTabPosition() == 1) {
+                            addToEListASynchTask = new addToEListASynchTask(qvl.get(menuItem.getItemId()), kresult.get(position));
+                        }
+                        if (addToEListASynchTask != null)
+                            addToEListASynchTask.execute();
                         return true;
                     }
                 });
@@ -986,6 +1070,9 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
                 return false;
             }
 
+    /**
+     * RecyclerView adapter used for the main search.
+     */
     public class searchRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         class dictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -1001,7 +1088,7 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
                 tv_defs = view.findViewById(R.id.text_defs);
                 entry_layout = view.findViewById(R.id.item_layout);
                 pos_resph = view.findViewById(R.id.pos_resph);
-                options = view.findViewById(R.id.entry_more);
+                options = view.findViewById(R.id.entry_quickadd);
                 options.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -1083,6 +1170,11 @@ public class searchFragment extends android.support.v4.app.Fragment implements s
             return null;
         }
 
+        /**
+         * Function used to add the colored parts of speech icons
+         * @param ll
+         * @param pos
+         */
         public void addPos(LinearLayout ll, ArrayList<String> pos) {
             for (String s : pos) {
                 String sw = s.replaceAll("\\[|\\]", "");

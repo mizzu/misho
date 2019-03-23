@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * Helper class to create/instantiate/update the SQLite database.
+ */
 public class JMDataBaseHelper extends SQLiteOpenHelper {
     private static JMDataBaseHelper sInstance;
     private Context mc;

@@ -3,6 +3,10 @@ package com.miz.misho.Objects;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * Sense object for dictionary entries. Each entry may have multiple senses depending on the parts
+ * of speech and such. This is to keep it more organized.
+ */
 public class ESense implements Serializable {
 
     private ArrayList<String> pos;

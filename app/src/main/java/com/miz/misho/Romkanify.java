@@ -10,7 +10,9 @@ public class Romkanify {
     private HashMap<String, String> Romkana;
     private HashMap<Character, Character> htk;
 
+    //A trie to hold valid text blocks (hi, fu, ba, kya, etc.)
     private RomajiTrie RT;
+
 
     private class TNode {
         private HashMap<Character, TNode> children;
@@ -58,6 +60,16 @@ public class Romkanify {
 
         }
 
+        /**
+         * A function that steps backwards to find a valid text block. IE:
+         * If we put in kya, it will return 3 because kya is valid.
+         * If we put in nin, it will step back to ni, and return 2 because ni is valid
+         * Lastly, if we put in enn, it will step back twice to e, and return 1 because e is valid.
+         * (double consonants are handled in the main function)
+         * If it steps back and nothing was found, will return -1 and throw an error.
+         * @param substrings Substring of main string, max size 3, to find a valid text block in.
+         * @return An int for the size of the valid text block found
+         */
         public int repeatSearch(String substrings) {
             String substring;
             if(substrings.length() > 3) {
@@ -83,6 +95,11 @@ public class Romkanify {
         }
     }
 
+    /**
+     * Initializes the hashmap used to convert romaji -> hiragana and katakana -> hiragana.
+     * Katakana -> hiragana is only used for an onyomi search because the results are stored in
+     * katakana (called by using katakanify).
+     */
     public Romkanify(){
         Romkana = new HashMap<>();
         //build table
@@ -336,10 +353,17 @@ public class Romkanify {
     }
 
 
-
+    /**
+     * Uses the trie and repeatSearch function to get a correct hiragana conversion.
+     * computeAt is a cursor that holds the position of the next three characters to be converted.
+     * kana holds the string being built.
+     * @param s String to be turned into hiragana
+     * @return returns converted hiragana string if computed successfully.
+     * @throws InvalidRomaji
+     */
     public String kanify(String s) throws  InvalidRomaji{
         int computeAt = 0;
-        String kana = "";
+        StringBuilder kana = new StringBuilder();
         while (computeAt != s.length()) {
             if(s.substring(computeAt).length() > 1) {
                 if((s.substring(computeAt).charAt(0) == s.substring(computeAt).charAt(1))
@@ -349,21 +373,27 @@ public class Romkanify {
                         (s.substring(computeAt).charAt(0) != 'o') &&
                         (s.substring(computeAt).charAt(0) != 'u') &&
                         (s.substring(computeAt).charAt(0) != 'n'))) {
-                    kana += "っ";
+                    kana.append("っ");
                     computeAt++;
                 }
             }
             int t = RT.repeatSearch(s.substring(computeAt));
             if(t != -1 && Romkana.get(s.substring(computeAt, computeAt+t)) != null) {
-                kana += Romkana.get(s.substring(computeAt, computeAt+t));
+                kana.append(Romkana.get(s.substring(computeAt, computeAt+t)));
                 computeAt += t;
             } else {
                 throw new InvalidRomaji("Could not parse romaji input");
             }
         }
-        return kana;
+        return kana.toString();
     }
 
+    /**
+     * Function to convert hiragana to katakana.
+     * Used only in the onyomi search because onyomi data is stored in katakana.
+     * @param s String to turn into Katakana
+     * @return Katakana conversion of the inputted string.
+     */
     public String katakanify(String s) {
         StringBuilder out = new StringBuilder();
         for(int i = 0; i < s.length(); i++) {

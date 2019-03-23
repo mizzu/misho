@@ -3,6 +3,9 @@ package com.miz.misho.Objects;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * Kanji - Entry object. Meant to hold information as an object from kdict file.
+ */
 public class KEntry implements Serializable {
     private String kanji;
     private ArrayList<String> onyomi;

@@ -18,20 +18,14 @@
         <TextView
             android:id="@+id/keb_main"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
-
-        <ScrollView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:textIsSelectable="true" />
 
             <TextView
                 android:id="@+id/keb_other"
+                android:textIsSelectable="true"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:ellipsize="marquee"
-                android:scrollHorizontally="true"
-                android:singleLine="true" />
-        </ScrollView>
+                android:layout_height="match_parent"/>
 
     </LinearLayout>
 
@@ -45,20 +39,15 @@
         <TextView
             android:id="@+id/reb_main"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:textIsSelectable="true"/>
 
-        <ScrollView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/reb_other"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:ellipsize="marquee"
-                android:scrollHorizontally="true"
-                android:singleLine="true" />
-        </ScrollView>
+                android:singleLine="true"/>
 
     </LinearLayout>
 
@@ -66,6 +55,7 @@
         android:id="@+id/sense_lv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical"
+        android:padding="5dp"/>
 
 </LinearLayout>

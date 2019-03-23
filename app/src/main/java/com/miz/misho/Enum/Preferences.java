@@ -1,5 +1,8 @@
 package com.miz.misho.Enum;
 
+/**
+ * Preference values that reference the preference XML.
+ */
 public enum Preferences {
     SEARCH_TYPE("search_preference"),
     POP_UPs_ROMAJI("pop_ups_romaji"),

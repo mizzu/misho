@@ -2,6 +2,9 @@ package com.miz.misho.Objects;
 
 import java.io.Serializable;
 
+/**
+ * Vocab list object that holds relevant information.
+ */
 public class VocabList implements Serializable {
     private String name;
     private long size;

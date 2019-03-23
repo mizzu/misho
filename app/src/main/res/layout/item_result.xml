@@ -47,7 +47,7 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <ImageButton
-            android:id="@+id/entry_more"
+            android:id="@+id/entry_quickadd"
             style="?android:attr/actionOverflowButtonStyle"
             android:layout_width="20dp"
             android:layout_height="20dp"

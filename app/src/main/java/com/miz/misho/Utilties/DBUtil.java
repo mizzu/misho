@@ -14,8 +14,11 @@ import com.miz.misho.Objects.JMDataBaseHelper;
 import com.miz.misho.Objects.KEntry;
 import com.miz.misho.Objects.Radical;
 
-public class DBUtil {
 
+/**
+ * Database utility. Used for querying the database.
+ */
+public class DBUtil {
     private JMDataBaseHelper DBH;
 
 
@@ -23,11 +26,8 @@ public class DBUtil {
             DBH = JMDataBaseHelper.getInstance(context);
     }
 
-    // 0 = contains
-    // 1 = starts with
-    // 2 = ends with
-    // 3 = match only
 
+    // hiragana/katakana reading
     private String reb_SQL =
             "SELECT * FROM dictionary WHERE reb LIKE ? " +
                     "OR reb LIKE ? " +
@@ -35,6 +35,7 @@ public class DBUtil {
                     "OR reb LIKE ?"+
                     "ORDER BY nf ASC LIMIT ?";
 
+    //kanji reading
     private String keb_SQL =
             "SELECT * FROM dictionary WHERE keb LIKE ? " +
                     "OR keb LIKE ? " +
@@ -42,6 +43,7 @@ public class DBUtil {
                     "OR keb LIKE ?"+
                     "ORDER BY nf ASC LIMIT ?";
 
+    //glossary/english meaning
     private String gloss_SQL =
             "SELECT * FROM dictionary WHERE gloss LIKE ? " +
                     "OR gloss LIKE ? " +
@@ -74,49 +76,102 @@ public class DBUtil {
 
     private String[] params = {"%x%", "x%", "%x", "x"};
 
+    // pos is position of the spinner that contains the search options.
 
+    // 0 = contains
+    // 1 = starts with
+    // 2 = ends with
+    // 3 = match only
+
+    /**
+     * Query for the English meaning.
+     * @param text text to be searched.
+     * @param pos position of spinner.
+     * @param limit limit that's set in the preferences activity
+     * @return ArrayList of Dictionary Entry objects.
+     */
     public ArrayList<DEntry> gloss_Query(String text, int pos, String limit) {
         Cursor c = DBH.mdb.rawQuery(gloss_SQL, new String[]{"%;" + params[pos].replace("x", text) + ";%", "[" + params[pos].replace("x", text) + ";%", "%;" + params[pos].replace("x", text) + "]", "[" + params[pos].replace("x", text) + "]", limit});
         return rowsToEntries(c);
     }
 
+
+    /**
+     * Query using the kanji reading.
+     * @param text text to be searched.
+     * @param pos position of spinner.
+     * @param limit limit that's set in the preferences activity
+     * @return ArrayList of Dictionary Entry objects.
+     */
     public ArrayList<DEntry> keb_Query(String text, int pos, String limit) {
         Cursor c = DBH.mdb.rawQuery(keb_SQL, new String[]{"%;" + params[pos].replace("x", text) + ";%",  params[pos].replace("x", text) + ";%", "%;" + params[pos].replace("x", text)  , params[pos].replace("x", text), limit});
         return rowsToEntries(c);
     }
 
+
+    /**
+     * Query for the hiragana/katakana reading.
+     * @param text text to be searched.
+     * @param pos position of spinner.
+     * @param limit limit that's set in the preferences activity
+     * @return ArrayList of Dictionary Entry objects.
+     */
     public ArrayList<DEntry> reb_Query(String text, int pos, String limit) {
         Cursor c = DBH.mdb.rawQuery(reb_SQL, new String[]{"%;" + params[pos].replace("x", text) + ";%",  params[pos].replace("x", text) + ";%", "%;" + params[pos].replace("x", text) ,  params[pos].replace("x", text), limit});
         return rowsToEntries(c);
     }
 
+    @Deprecated
     public Cursor gloss_QueryCursor(String text, int pos, String limit) {
         return DBH.mdb.rawQuery(gloss_SQL, new String[]{"%;" + params[pos].replace("x", text) + ";%", "[" + params[pos].replace("x", text) + ";%", "%;" + params[pos].replace("x", text) + "]", "[" + params[pos].replace("x", text) + "]", limit});
     }
 
+    @Deprecated
     public Cursor keb_QueryCursor(String text, int pos, String limit) {
         return  DBH.mdb.rawQuery(keb_SQL, new String[]{"%;" + params[pos].replace("x", text) + ";%",  params[pos].replace("x", text) + ";%", "%;" + params[pos].replace("x", text)  , params[pos].replace("x", text), limit});
     }
 
+    @Deprecated
     public Cursor reb_QueryCursor(String text, int pos, String limit) {
         return  DBH.mdb.rawQuery(reb_SQL, new String[]{"%;" + params[pos].replace("x", text) + ";%",  params[pos].replace("x", text) + ";%", "%;" + params[pos].replace("x", text) ,  params[pos].replace("x", text), limit});
     }
 
+    /**
+     * Query to look up a specific kanji character. Should always result with an array list of
+     * size 1. (The kanji character itself is the primary key in the database)
+     * @param kanji
+     * @return An arrayList of Kanji Entries
+     */
     public ArrayList<KEntry> kanji_Query(String kanji) {
         Cursor c = DBH.mdb.rawQuery(kanji_SQL, new String[] {kanji});
         return  rowsToKEntries(c);
     }
 
+    /**
+     * Kunyomi query.
+     * @param kun Kunyomi string
+     * @return Kanji containing the queried kunyomi
+     */
     public ArrayList<KEntry> kun_Query(String kun) {
         Cursor c = DBH.mdb.rawQuery(kun_SQL, new String[] {"%"+kun+"%"});
         return  rowsToKEntries(c);
     }
 
+    /**
+     * Onyomi query.
+     * @param kun Onyomi string
+     * @return Kanji containing the queried onyomi
+     */
     public ArrayList<KEntry> ony_Query(String ony) {
         Cursor c = DBH.mdb.rawQuery(ony_SQL, new String[] {"%"+ony+"%"});
         return  rowsToKEntries(c);
     }
 
+    /**
+     * Queries for kanji using radicals.
+     * @param rad ArrayList of radicals to search with
+     * @return an ArrayList of kanji from the resulting cursor.
+     */
     public ArrayList<Radical> rad_Query(ArrayList<Radical> rad) {
         Cursor c;
         if(rad.size() == 1) {
@@ -139,6 +194,11 @@ public class DBUtil {
         return rowsToKStrings(c);
     }
 
+    /**
+     * Used in radical search to return resulting kanji.
+     * @param c cursor from query
+     * @return returns resulting kanji in an arraylist of radicals from radical search
+     */
     ArrayList<Radical> rowsToKStrings(Cursor c) {
         boolean isFirst = true;
         int curr_stroke = 0;
@@ -162,10 +222,16 @@ public class DBUtil {
         return rb;
     }
 
-    ArrayList<KEntry> rowsToKEntries(Cursor c) {
+
+    /**
+     * Returns an arraylist of Kanji Entry objects from the passed cursor.
+     * @param cursor from database query
+     * @return an arraylist of Kanji Entry Objects
+     */
+    ArrayList<KEntry> rowsToKEntries(Cursor cursor) {
         ArrayList<KEntry> kr = new ArrayList<>();
-        if (c.moveToFirst()) {
-            while (!c.isAfterLast()) {
+        if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
                 KEntry tmp = new KEntry();
                 ArrayList<String> tmpmean = new ArrayList<>();
 
@@ -175,16 +241,16 @@ public class DBUtil {
 
                 ArrayList<String> tmpnanori = new ArrayList<>();
 
-                tmp.setKanji(c.getString(c.getColumnIndex("kanji")));
-                tmp.setJlpt(c.getInt(c.getColumnIndex("jlpt")));
-                tmp.setFreq(c.getInt(c.getColumnIndex("freq")));
-                tmp.setGrade(c.getInt(c.getColumnIndex("grade")));
-                tmp.setStroke_count(c.getInt(c.getColumnIndex("stroke_count")));
+                tmp.setKanji(cursor.getString(cursor.getColumnIndex("kanji")));
+                tmp.setJlpt(cursor.getInt(cursor.getColumnIndex("jlpt")));
+                tmp.setFreq(cursor.getInt(cursor.getColumnIndex("freq")));
+                tmp.setGrade(cursor.getInt(cursor.getColumnIndex("grade")));
+                tmp.setStroke_count(cursor.getInt(cursor.getColumnIndex("stroke_count")));
 
-                tmpkunyomi.addAll(Arrays.asList(c.getString(c.getColumnIndex("kunyomi")).split(";")));
-                tmponyomi.addAll(Arrays.asList(c.getString(c.getColumnIndex("onyomi")).split(";")));
-                tmpnanori.addAll(Arrays.asList(c.getString(c.getColumnIndex("nanori")).split(";")));
-                tmpmean.addAll(Arrays.asList(c.getString(c.getColumnIndex("meanings")).split(";")));
+                tmpkunyomi.addAll(Arrays.asList(cursor.getString(cursor.getColumnIndex("kunyomi")).split(";")));
+                tmponyomi.addAll(Arrays.asList(cursor.getString(cursor.getColumnIndex("onyomi")).split(";")));
+                tmpnanori.addAll(Arrays.asList(cursor.getString(cursor.getColumnIndex("nanori")).split(";")));
+                tmpmean.addAll(Arrays.asList(cursor.getString(cursor.getColumnIndex("meanings")).split(";")));
 
                 tmp.setKunyomi(tmpkunyomi);
                 tmp.setOnyomi(tmponyomi);
@@ -192,12 +258,17 @@ public class DBUtil {
                 tmp.setMeaning(tmpmean);
 
                 kr.add(tmp);
-                c.moveToNext();
+                cursor.moveToNext();
             }
         }
         return kr;
     }
 
+    /**
+     * Returns an arraylist of Database Entry objects from the passed cursor.
+     * @param cursor from database query
+     * @return an arraylist of Dictionary Entry Objects
+     */
     ArrayList<DEntry> rowsToEntries(Cursor cursor) {
         ArrayList<DEntry> rsEnts = new ArrayList<>();
         DEntry temp = new DEntry();
@@ -262,6 +333,7 @@ public class DBUtil {
 }
 
 
+    @Deprecated
     public DEntry rowToEntry(Cursor cursor) {
         DEntry temp = new DEntry();
         ArrayList<ESense> etemp = new ArrayList<>();

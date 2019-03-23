@@ -2,6 +2,9 @@ package com.miz.misho.Objects;
 
 import java.io.Serializable;
 
+/**
+ * Holds radical information. Also used for the radical search to hold kanji elements.
+ */
 public class Radical implements Serializable {
     private String radical;
     private int strokes;

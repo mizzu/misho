@@ -58,6 +58,8 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
     searchActivity mActivity;
 
     ActionMode mActionModeBatchAdd;
+
+    //call back used when batch add is pressed
     ActionMode.Callback amcBatchAdd = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -98,6 +100,7 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
     };
 
     ActionMode mActionModeBatchSelect;
+    //call back when batch editing files
     ActionMode.Callback amcBatchSelect = new ActionMode.Callback() {
         boolean changed = false;
 
@@ -183,22 +186,6 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(requestCode == Permissions.MISHO_WRITE_TO_EXTERNAL_STORAGE.getVal()) {
-            for(int i = 0; i < permissions.length; i++) {
-                if (permissions[i].equalsIgnoreCase(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
-                        createToast("Write to External Storage permissions required");
-                        mActivity.getSupportFragmentManager().popBackStackImmediate();
-                    }
-
-                }
-            }
-        }
-
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -234,6 +221,11 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
         return view;
     }
 
+    /**
+     * Called when in an action mode.
+     * @param path
+     * @return
+     */
     public boolean addRemoveSelected(String path) {
         if(selectedPaths.contains(path)) {
             selectedPaths.remove(path);
@@ -244,6 +236,9 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
         }
     }
 
+    /**
+     * RecyclerView for the vocabulary lists.
+     */
     class vListView extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         class vListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
@@ -437,6 +432,9 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    /**
+     * Rescan to find the files in the current directory (relpath)
+     */
     public void rescan() {
         vl = fileUtil.scanFiles(relpath);
         rVocabAdapter.notifyDataSetChanged();
@@ -446,6 +444,11 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
         Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Called when the add button is pressed.
+     * Used to add a new folder/list to the current directory.
+     * @param view
+     */
     public void doAdd(View view) {
         if((ContextCompat.checkSelfPermission(this.getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED)) {
@@ -515,11 +518,19 @@ public class vocabFragment extends Fragment implements vocabFragInterface {
         return true;
     }
 
+    /**
+     * Goes up a directory.
+     */
     public void goUpDir() {
         relpath = relpath.substring(0, relpath.lastIndexOf('/'));
         rescan();
     }
 
+    /**
+     * Called when the shishkebab on the vocabulary list is pressed.
+     * @param view
+     * @param position
+     */
     public void doListOptions(View view, final int position){
         PopupMenu pm = new PopupMenu(mActivity, view);
         pm.getMenuInflater().inflate(R.menu.vocab_list_options, pm.getMenu());

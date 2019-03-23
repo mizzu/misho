@@ -21,10 +21,10 @@
     <string name="onyomi">Onyomi</string>
     <string name="kunyomi">Kunyomi</string>
     <string name="nanori">Nanori</string>
-    <string name="stroke_count">Stroke Count:</string>
-    <string name="jlpt">JLPT:</string>
-    <string name="grade">Grade:</string>
-    <string name="freq">Frequency:</string>
+    <string name="stroke_count">Stroke Count</string>
+    <string name="jlpt">JLPT</string>
+    <string name="grade">Grade</string>
+    <string name="freq">Frequency</string>
     <string name="radicals">Radicals</string>
 
     <string name="show">Show</string>

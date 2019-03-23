@@ -28,7 +28,9 @@ import com.miz.misho.Utilties.FileUtil;
 
 import java.util.ArrayList;
 
-
+/**
+ * Fragment used when viewing a vocabulary list.
+ */
 public class vocabViewFragment extends Fragment {
 
 
@@ -146,6 +148,10 @@ public class vocabViewFragment extends Fragment {
                 mActivity.onBackPressed();
                 break;
             case R.id.vocabview_study:
+                if(list.isEmpty()){
+                    createToast("List is empty");
+                    break;
+                }
                 Intent toStudy = new Intent(mActivity, studyActivity.class);
                 toStudy.putExtra("LIST", list);
                 startActivity(toStudy);
@@ -165,6 +171,10 @@ public class vocabViewFragment extends Fragment {
         mActivity.getmDrawerToggle().setDrawerIndicatorEnabled(true);
     }
 
+    /**
+     * Called when the ActionMode is completed.
+     * @param b If true, deletes the selected items.
+     */
     public void resetStates(boolean b) {
             for(int i = (selected.length-1); i > -1; i--) {
                 if (selected[i]) {
@@ -181,6 +191,9 @@ public class vocabViewFragment extends Fragment {
             }
         }
 
+    /**
+     * RecyclerView to for the entries (either KEntry or DEntry)
+     */
     class vocabViewRecyclerView extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         class dictViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
@@ -196,7 +209,7 @@ public class vocabViewFragment extends Fragment {
                 tv_defs = view.findViewById(R.id.text_defs);
                 entry_layout = view.findViewById(R.id.item_layout);
                 pos_resph = view.findViewById(R.id.pos_resph);
-                options = view.findViewById(R.id.entry_more);
+                options = view.findViewById(R.id.entry_quickadd);
                 view.setOnClickListener(this);
                 view.setOnLongClickListener(this);
             }

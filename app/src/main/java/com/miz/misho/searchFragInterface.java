@@ -2,6 +2,9 @@ package com.miz.misho;
 
 import android.view.View;
 
+/**
+ * Interface to call methods from activity.
+ */
 public interface searchFragInterface {
     void pickSearch(View view);
     void showRadKanji(View view);

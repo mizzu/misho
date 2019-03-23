@@ -10,6 +10,11 @@ import android.widget.TextView;
 import com.miz.misho.Objects.DEntry;
 import com.miz.misho.Objects.KEntry;
 
+/**
+ * Fragment used to disp
+ * lay the current "card" of the vocabulary list fragment.
+ * The back of the "card" is just its normal entry view without an options bar.
+ */
 public class cardfrontFragment extends Fragment {
 
     TextView text_front;

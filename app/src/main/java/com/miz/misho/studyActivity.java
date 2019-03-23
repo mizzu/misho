@@ -36,7 +36,11 @@ import com.miz.misho.Objects.VocabList;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
 
+/**
+ * Activity called when the study button is pressed.
+ */
 public class studyActivity extends AppCompatActivity {
 
     SharedPreferences mSP;
@@ -110,9 +114,9 @@ public class studyActivity extends AppCompatActivity {
             vocabList = (ArrayList<Object>)saveInstanceState.getSerializable("list");
         }
 
-        list_remaining.setText(Integer.toString(vocabList.size()));
-        score_pos_item.setText(Integer.toString(score_pos));
-        score_neg_item.setText(Integer.toString(score_neg));
+        list_remaining.setText(String.format(Locale.getDefault(), Integer.toString(vocabList.size())));
+        score_pos_item.setText(String.format(Locale.getDefault(), Integer.toString(score_pos)));
+        score_neg_item.setText(String.format(Locale.getDefault(), Integer.toString(score_neg)));
 
     }
 
@@ -130,6 +134,10 @@ public class studyActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Gets the next 'card' in the list.
+     * If empty, displays the study score.
+     */
     public void getNewCard() {
         if(vocabList.isEmpty()) {
             AlertDialog.Builder bl = new AlertDialog.Builder(this);
@@ -186,6 +194,10 @@ public class studyActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Pressed when the 'Know' button is pressed
+     * @param view
+     */
     public void doKnow(View view){
         vocabList.remove(0);
         score_pos++;
@@ -193,6 +205,10 @@ public class studyActivity extends AppCompatActivity {
         getNewCard();
     }
 
+    /**
+     * Pressed when 'Do Not Know' button is pressed
+     * @param view
+     */
     public void doNotKnow(View view) {
         vocabList.add(vocabList.get(0));
         vocabList.remove(0);
@@ -201,12 +217,20 @@ public class studyActivity extends AppCompatActivity {
         getNewCard();
     }
 
+    /**
+     * Updates the score located in the top right of the screen.
+     */
     public void updateScore() {
-        list_remaining.setText(Integer.toString(vocabList.size()));
-        score_pos_item.setText(Integer.toString(score_pos));
-        score_neg_item.setText(Integer.toString(score_neg));
+        list_remaining.setText(String.format(Locale.getDefault(), Integer.toString(vocabList.size())));
+        score_pos_item.setText(String.format(Locale.getDefault(), Integer.toString(score_pos)));
+        score_neg_item.setText(String.format(Locale.getDefault(), Integer.toString(score_neg)));
     }
 
+    /**
+     * Used when the 'Show' button is pressed.
+     * Sends an extra parameter to the fragment to not change the menu (ISVOCAB).
+     * @param view
+     */
     public void toggleDef(View view) {
         if (!isDef) {
             if (isEntry) {

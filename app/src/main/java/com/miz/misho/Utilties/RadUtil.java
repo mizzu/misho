@@ -9,7 +9,12 @@ public class RadUtil {
 private ArrayList<Radical> radList;
 
 
-public RadUtil(){
+    /**
+     * Utility to store a list of radicals programatically.
+     * No radical or kanji has more than 100 strokes, so this is used as a "title" placeholder for
+     * any stroke count found over 100.
+     */
+    public RadUtil(){
     radList = new ArrayList<>();
 
     radList.add(new Radical("1", 101)); // placeholder for new lines
@@ -286,19 +291,8 @@ public RadUtil(){
 
 }
 
-class radSort implements Comparator<Radical> {
-    @Override
-    public int compare(Radical radical, Radical t1) {
-        return Integer.valueOf(radical.getStrokes()).compareTo(t1.getStrokes());
-    }
-}
-
     public ArrayList<Radical> getRadList() {
         return radList;
-    }
-
-    public void setRadList(ArrayList<Radical> radList) {
-        this.radList = radList;
     }
 
 }

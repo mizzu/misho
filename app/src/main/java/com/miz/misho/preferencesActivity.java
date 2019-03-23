@@ -11,6 +11,9 @@ import android.preference.PreferenceManager;
 
 import com.miz.misho.Enum.Preferences;
 
+/**
+ * Activity that's called when settings is tapped.
+ */
 public class preferencesActivity extends PreferenceActivity {
 
     SharedPreferences mSP;
@@ -47,6 +50,7 @@ public class preferencesActivity extends PreferenceActivity {
                 search_type_pref.setSummary(newValue.toString());
                 if(((String) newValue ).equalsIgnoreCase("Jisho")) {
                     auto_search.setChecked(false);
+                    //Disables auto_search for the Jisho api.
                 }
                 return true;
             }
@@ -76,6 +80,7 @@ public class preferencesActivity extends PreferenceActivity {
             @Override
             public boolean onPreferenceChange(Preference preference, Object o) {
                 recreate();
+                //changed theme immediately
                 return true;
             }
         });

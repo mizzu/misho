@@ -3,71 +3,95 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/kanji_mll"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/entry_sense_border">
 
-
-    <LinearLayout
+<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@drawable/entry_sense_border">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="2"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@drawable/entry_sense_border"
+            android:padding="1dip">
 
             <TextView
                 android:id="@+id/jlpt_title"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/jlpt"
-                android:textSize="@dimen/ktitletextsize" />
+                android:textSize="@dimen/ktitletextsize"
+
+                android:gravity="center_horizontal|center"
+                android:background="@color/title_bg_opaque"/>
 
             <TextView
                 android:id="@+id/jlpt_ph"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+
+                android:gravity="center_horizontal|center"
                 android:textSize="@dimen/kinfotextsize" />
 
             <TextView
                 android:id="@+id/grade_title"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/grade"
-                android:textSize="@dimen/ktitletextsize" />
+                android:textSize="@dimen/ktitletextsize"
+
+                android:gravity="center_horizontal|center"
+                android:background="@color/title_bg_opaque"/>
 
             <TextView
                 android:id="@+id/grade_ph"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/kinfotextsize" />
+                android:textSize="@dimen/kinfotextsize"
+
+                android:gravity="center_horizontal|center"
+                />
 
             <TextView
                 android:id="@+id/stroke_title"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/stroke_count"
-                android:textSize="@dimen/ktitletextsize" />
+                android:textSize="@dimen/ktitletextsize"
+
+                android:gravity="center_horizontal|center"
+                android:background="@color/title_bg_opaque"/>
 
             <TextView
                 android:id="@+id/stroke_ph"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/kinfotextsize" />
+                android:textSize="@dimen/kinfotextsize"
+
+                android:gravity="center_horizontal|center"/>
 
             <TextView
                 android:id="@+id/freq_title"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/freq"
-                android:textSize="@dimen/ktitletextsize" />
+                android:textSize="@dimen/ktitletextsize"
+
+                android:gravity="center_horizontal|center"
+                android:background="@color/title_bg_opaque"/>
 
             <TextView
                 android:id="@+id/freq_ph"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+
+                android:gravity="center_horizontal|center"
                 android:textSize="@dimen/kinfotextsize" />
         </LinearLayout>
 
@@ -80,12 +104,25 @@
             android:textSize="144sp" />
     </LinearLayout>
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="1dip"
+        android:orientation="vertical">
     <TextView
         android:id="@+id/meaning_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/meaning_title"
-        android:textSize="@dimen/ktitletextsize" />
+        android:textSize="@dimen/ktitletextsize"
+
+
+        android:gravity="center_horizontal|center"
+        android:background="@color/title_bg_opaque"/>
 
     <TextView
         android:id="@+id/meaning_ph"
@@ -98,7 +135,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/kunyomi"
-        android:textSize="@dimen/ktitletextsize" />
+        android:textSize="@dimen/ktitletextsize"
+
+
+        android:gravity="center_horizontal|center"
+        android:background="@color/title_bg_opaque"/>
 
     <TextView
         android:id="@+id/kunyomi_ph"
@@ -111,7 +152,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/onyomi"
-        android:textSize="@dimen/ktitletextsize" />
+        android:textSize="@dimen/ktitletextsize"
+
+
+        android:gravity="center_horizontal|center"
+        android:background="@color/title_bg_opaque"/>
 
     <TextView
         android:id="@+id/onyomi_ph"
@@ -124,12 +169,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/nanori"
-        android:textSize="@dimen/ktitletextsize" />
+        android:textSize="@dimen/ktitletextsize"
+
+
+        android:gravity="center_horizontal|center"
+        android:background="@color/title_bg_opaque"/>
 
     <TextView
         android:id="@+id/nanori_ph"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="@dimen/kinfotextsize" />
-
+    </LinearLayout>
+    </ScrollView>
 </LinearLayout>

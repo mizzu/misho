@@ -101,7 +101,10 @@ public class searchActivity extends AppCompatActivity {
             searchFragInterface = (searchFragment) mFragment;
         } else {
             mFragment = getSupportFragmentManager().getFragment(saveInstanceState, "curr");
-            searchFragInterface = (searchFragment) mFragment;
+            if(mFragment instanceof searchFragment)
+                searchFragInterface = (searchFragment) mFragment;
+            else if(mFragment instanceof vocabFragment)
+                vocabFragInterface = (vocabFragment) mFragment;
         }
 
 
@@ -174,6 +177,12 @@ public class searchActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Checks permissions.
+     * @param requestCode see {@link Permissions}
+     * @param permissions
+     * @param grantResults
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -209,6 +218,10 @@ public class searchActivity extends AppCompatActivity {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
+    /**
+     * Catches back press to handle if the navigation menu is open or to go up a directory in the
+     * vocabulary fragment.
+     */
     @Override
     public void onBackPressed() {
         if (dr_main.isDrawerOpen(GravityCompat.START)) {
@@ -225,6 +238,12 @@ public class searchActivity extends AppCompatActivity {
             super.onBackPressed();
     }
 
+    /**
+     * Catches button presses and handles them if needed.
+     * @param keyCode
+     * @param event
+     * @return
+     */
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_MENU && !dr_main.isDrawerOpen(GravityCompat.START)) {
             dr_main.openDrawer(GravityCompat.START);
@@ -235,18 +254,36 @@ public class searchActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Callback to handle if the search button is pressed.
+     * @param view
+     */
     public void pickSearch(View view) {
         searchFragInterface.pickSearch(view);
     }
 
+    /**
+     * Callback to handle if the radical search button is pressed.
+     * @param view
+     */
     public void showRadKanji(View view) {
         searchFragInterface.showRadKanji(view);
     }
 
+
+    /**
+     * Callback to handle if one of the radical buttons is pressed.
+     * @param view
+     */
     public void doRadSearch(View view) {
         searchFragInterface.doRadSearch(view);
     }
 
+
+    /**
+     * Callback to handle if one of the kanji results from the radical search is pressed.
+     * @param view
+     */
     public void toInput(View view) {
         searchFragInterface.toInput(view);
     }

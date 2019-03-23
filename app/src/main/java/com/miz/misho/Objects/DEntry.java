@@ -3,6 +3,10 @@ package com.miz.misho.Objects;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * Dictionary Entry object. Meant to dictionary information from an entry in object.
+ * re-pri is 1000 by default if it doesn't contain any frequency information from the wordfreq file.
+ */
 public class DEntry implements Serializable{
 
     public ArrayList<ESense> senses;

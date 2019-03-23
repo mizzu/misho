@@ -1,146 +1,200 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/card_sense"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/card_sense"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/entry_sense_border"
+        android:padding="1dip"
+        android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="3dp">
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/sense_ph"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/infotextsize" />
+            android:gravity="center_horizontal|center"
+            android:textSize="@dimen/infotextsize"
+            android:background="@color/title_bg_opaque"
+            android:padding="2dp"/>
 
         <TextView
             android:id="@+id/pos_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal|center"
             android:text="@string/pos_title"
-            android:textSize="@dimen/titletextsize" />
+            android:textSize="@dimen/titletextsize"
+            android:background="@color/title_bg_opaque"/>
 
         <TextView
             android:id="@+id/pos_ph"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/infotextsize" />
+            android:textSize="@dimen/infotextsize"
+            android:background="?colorPrimary"
+            android:padding="2dp"/>
 
 
         <TextView
             android:id="@+id/field_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal|center"
             android:text="@string/field_title"
-            android:textSize="@dimen/titletextsize" />
+            android:textSize="@dimen/titletextsize"
+            android:background="@color/title_bg_opaque"/>
 
         <TextView
             android:id="@+id/field_ph"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/infotextsize" />
+            android:textSize="@dimen/infotextsize"
+
+            android:background="?colorPrimary"
+            android:padding="2dp"/>
 
         <TextView
             android:id="@+id/gloss_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal|center"
             android:text="@string/gloss_title"
-            android:textSize="@dimen/titletextsize" />
+            android:textSize="@dimen/titletextsize"
+            android:background="@color/title_bg_opaque"/>
 
         <TextView
             android:id="@+id/gloss_ph"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/infotextsize" />
+            android:textSize="@dimen/infotextsize"
+            android:textIsSelectable="true"
+            android:background="?colorPrimary"
+            android:padding="2dp"/>
 
         <TextView
             android:id="@+id/stag_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal|center"
             android:text="@string/stag_title"
-            android:textSize="@dimen/titletextsize" />
+            android:textSize="@dimen/titletextsize"
+
+            android:background="@color/title_bg_opaque"/>
 
         <TextView
             android:id="@+id/stagk_ph"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/infotextsize" />
+            android:textSize="@dimen/infotextsize"
+            android:textIsSelectable="true"
+            android:background="?colorPrimary"
+            android:padding="2dp"/>
 
         <TextView
             android:id="@+id/stagr_ph"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/infotextsize" />
+            android:textSize="@dimen/infotextsize"
+            android:textIsSelectable="true"
+            android:background="?colorPrimary"
+            android:padding="2dp"/>
 
         <TextView
             android:id="@+id/sinf_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal|center"
             android:text="@string/sinf_title"
-            android:textSize="@dimen/titletextsize" />
+            android:textSize="@dimen/titletextsize"
+            android:background="@color/title_bg_opaque"/>
 
         <TextView
             android:id="@+id/sinf_ph"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/infotextsize" />
+            android:textSize="@dimen/infotextsize"
+
+            android:background="?colorPrimary"
+            android:padding="2dp"/>
 
         <TextView
             android:id="@+id/ant_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal|center"
             android:text="@string/ant_title"
-            android:textSize="@dimen/titletextsize" />
+            android:textSize="@dimen/titletextsize"
+
+            android:background="@color/title_bg_opaque"/>
 
         <TextView
             android:id="@+id/ant_ph"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/infotextsize" />
+            android:textSize="@dimen/infotextsize"
+
+            android:background="?colorPrimary"
+            android:padding="2dp"/>
 
         <TextView
             android:id="@+id/dial_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal|center"
             android:text="@string/dial_title"
-            android:textSize="@dimen/titletextsize" />
+            android:textSize="@dimen/titletextsize"
+
+            android:background="@color/title_bg_opaque"/>
 
         <TextView
             android:id="@+id/dial_ph"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/infotextsize" />
+            android:textSize="@dimen/infotextsize"
+
+            android:background="?colorPrimary"
+            android:padding="2dp"/>
 
         <TextView
             android:id="@+id/lsource_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal|center"
             android:text="@string/lsource_title"
-            android:textSize="@dimen/titletextsize" />
+            android:textSize="@dimen/titletextsize"
+            android:background="@color/title_bg_opaque"/>
 
         <TextView
             android:id="@+id/lsource_ph"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/infotextsize" />
+            android:textSize="@dimen/infotextsize"
+
+            android:background="?colorPrimary"
+            android:padding="2dp"/>
 
         <TextView
             android:id="@+id/xref_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal|center"
             android:text="@string/xref_title"
-            android:textSize="@dimen/titletextsize" />
+            android:textSize="@dimen/titletextsize"
+            android:background="@color/title_bg_opaque"/>
 
         <TextView
             android:id="@+id/xref_ph"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/infotextsize" />
-
+            android:textSize="@dimen/infotextsize"
+            android:background="?colorPrimary"
+            android:padding="2dp"/>
 
     </LinearLayout>
 
-</android.support.v7.widget.CardView>
+    </android.support.constraint.ConstraintLayout>

@@ -1,9 +1,11 @@
 package com.miz.misho;
 
 import android.content.DialogInterface;
+import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.menu.ActionMenuItem;
@@ -32,7 +34,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Locale;
 
+/**
+ * The entry view fragment that contains the entry's kanji and radical meanings, as well as its
+ * senses.
+ */
 public class entryviewFragment extends android.support.v4.app.Fragment {
     DEntry entry;
     boolean isDark;
@@ -69,11 +76,14 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
         mActivity = null;
         if(getActivity() instanceof searchActivity)
             mActivity =  (searchActivity) getActivity();
+
         rSenseView = view.findViewById(R.id.sense_lv);
+        rSenseView.addItemDecoration(new EntryItemDecoration(50));
         rSenseManager = new LinearLayoutManager(getActivity());
         rSenseView.setLayoutManager(rSenseManager);
         rSenseAdapter = new rSenseAdapter();
         rSenseView.setAdapter(rSenseAdapter);
+
         TextView keb = view.findViewById(R.id.keb_main);
         TextView reb = view.findViewById(R.id.reb_main);
         TextView keb_other = view.findViewById(R.id.keb_other);
@@ -129,17 +139,40 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        //resets the main option menu for the toolbar
         if(!isVocab)
             mActivity.getmDrawerToggle().setDrawerIndicatorEnabled(true);
     }
 
+    /**
+     * Item decorator that adds some space between the sense objects. Gives it a less cluttered
+     * look.
+     */
+    public class EntryItemDecoration extends RecyclerView.ItemDecoration {
+
+        private final int verticalSpaceHeight;
+
+        public EntryItemDecoration(int verticalSpaceHeight) {
+            this.verticalSpaceHeight = verticalSpaceHeight;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent,
+                                   RecyclerView.State state) {
+            outRect.bottom = verticalSpaceHeight;
+        }
+    }
+
+    /**
+     * RecyclerView.Adapter that creates the sense boxes.
+     */
     class rSenseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         class cardViewHolder extends RecyclerView.ViewHolder {
             public TextView tv_sense, tv_pos, tv_gloss, tv_dial, tv_field, tv_lsource,
                     tv_sinf, tv_stagk, tv_stagr, tv_ant, tv_xref, tvt_pos, tvt_gloss, tvt_dial,
                     tvt_field, tvt_lsource, tvt_sinf, tvt_stagk, tvt_ant, tvt_xref;
-            public CardView card;
+            public ConstraintLayout card;
 
             public cardViewHolder(View view) {
                 super(view);
@@ -171,23 +204,31 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View rad = LayoutInflater.from(parent.getContext()).inflate(R.layout.entry_sense, parent, false);
+            View rad = LayoutInflater.from(getActivity()).inflate(R.layout.entry_sense, parent, false);
             return new cardViewHolder(rad);
         }
 
+        /**
+         * Ugly way to handle loading only the data that exists, and removing its title if it
+         * doesn't
+         * @param holder
+         * @param position
+         */
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             cardViewHolder cvh = (cardViewHolder) holder;
-            cvh.tv_sense.setText("Sense " + Integer.toString(position + 1) + ":");
-            cvh.tv_pos.setText(entry.senses.get(position).getPos().toString().replaceAll("\\[|\\]", ""));
-            if (cvh.tv_pos.getText().toString().isEmpty()) {
+            cvh.tv_sense.setText(String.format(Locale.getDefault(),"Sense " + Integer.toString(position + 1)));
+            if (entry.senses.get(position).getPos().toString().replaceAll("\\[|\\]", "").isEmpty()) {
                 cvh.tv_pos.setVisibility(TextView.GONE);
                 cvh.tvt_pos.setVisibility(TextView.GONE);
+            } else {
+                cvh.tv_pos.setText("\u2022\t" + entry.senses.get(position).getPos().toString().replaceAll("\\[|\\]", "").replaceAll(", ", "\n\u2022\t"));
             }
-            cvh.tv_gloss.setText(entry.senses.get(position).getGloss().toString().replaceAll("\\[|\\]", ""));
-            if (cvh.tv_gloss.getText().toString().isEmpty()) {
+            if (entry.senses.get(position).getGloss().toString().replaceAll("\\[|\\]", "").isEmpty()) {
                 cvh.tv_gloss.setVisibility(TextView.GONE);
                 cvh.tvt_gloss.setVisibility(TextView.GONE);
+            } else {
+                cvh.tv_gloss.setText("\u2022\t" + entry.senses.get(position).getGloss().toString().replaceAll("\\[|\\]", "").replaceAll(", ", "\n\u2022\t"));
             }
             cvh.tv_dial.setText(entry.senses.get(position).getDial().toString().replaceAll("\\[|\\]", ""));
             if (cvh.tv_dial.getText().toString().isEmpty()) {
@@ -254,9 +295,16 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    /**
+     * Threaded task to add a entry to a file.
+     */
     class addToEListASynchTask extends AsyncTask<Void, Void, Integer> {
         VocabList vl;
 
+        /**
+         * Threaded task to add a entry to a file.
+         * @param vl Vocabulary list to add to.
+         */
         public addToEListASynchTask(VocabList vl){
             this.vl = vl;
         }
@@ -286,7 +334,7 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
     public boolean onOptionsItemSelected(final MenuItem item) {
         if (!isVocab) {
             switch (item.getItemId()) {
-                case R.id.entry_add:
+                case R.id.entry_add: //adding opens up the vocabview with the BatchAdd callback activated
                     vocabFragment kvf = new vocabFragment();
                     Bundle tof = new Bundle();
                     tof.putSerializable("TOADD", entry);
@@ -300,7 +348,7 @@ public class entryviewFragment extends android.support.v4.app.Fragment {
                     }
                     ft.commit();
                     break;
-                case R.id.entry_quickadd:
+                case R.id.entry_quickadd: //checks the quickadd list
                     final ArrayList<VocabList> qvl = mActivity.getQuickAdd();
                         if(qvl.isEmpty())
                             return false;

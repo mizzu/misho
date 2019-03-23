@@ -18,14 +18,14 @@ import org.json.*;
 import org.apache.commons.io.IOUtils;
 
 
-
-
+/**
+ * Helper class to get results from Jisho.org
+ */
 public class WebUtil {
 
     final private String base = "https://jisho.org/api/v1/search/words?keyword=";
-    //final String kbase = "";
-  //  final String edr = "\\{\"english_definitions\":(.*?)]";
- //   final Pattern pattern = Pattern.compile(edr);
+
+
   private ArrayList<DEntry> rez;
 
   public void WebUtil() {
